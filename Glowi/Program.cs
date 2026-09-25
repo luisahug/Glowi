@@ -2,6 +2,8 @@ using Glowi.Data;
 using Glowi.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +20,14 @@ options.SignIn.RequireConfirmedAccount = false)
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+var ptBR = new CultureInfo("pt-BR");
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(ptBR),
+    SupportedCultures = new[] { ptBR },
+    SupportedUICultures = new[] { ptBR }
+});
 
 using (var scope = app.Services.CreateScope())
 {
