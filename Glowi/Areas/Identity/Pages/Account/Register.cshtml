@@ -13,6 +13,20 @@
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
+                <select asp-for="Input.Tipo" class="form-select" aria-required="true">
+                    <option value="">Selecione...</option>
+                    <option value="Cliente">Cliente</option>
+                    <option value="Profissional">Profissional</option>
+                </select>
+                <label asp-for="Input.Tipo">Tipo de conta</label>
+                <span asp-validation-for="Input.Tipo" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Nome" class="form-control" autocomplete="name" aria-required="true" placeholder="Seu nome" />
+                <label asp-for="Input.Nome">Nome</label>
+                <span asp-validation-for="Input.Nome" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
                 <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                 <label asp-for="Input.Email">Email</label>
                 <span asp-validation-for="Input.Email" class="text-danger"></span>

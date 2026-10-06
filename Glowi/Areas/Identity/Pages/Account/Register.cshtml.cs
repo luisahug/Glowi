@@ -95,8 +95,16 @@ public class RegisterModel : PageModel
         /// </summary>
         [DataType(DataType.Password)]
         [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [Compare("Password", ErrorMessage = "Senha e confirmação não batem.")]
         public string? ConfirmPassword { get; set; }
+
+        [Required]
+        [Display(Name = "Nome")]
+        public string Nome { get; set; }
+
+        [Required]
+        [Display(Name = "Tipo")] //profissional ou cliente
+        public string Tipo { get; set; }
     }
 
 
@@ -113,6 +121,7 @@ public class RegisterModel : PageModel
         if (ModelState.IsValid)
         {
             var user = CreateUser();
+            user.Nome = Input.Nome;
 
             await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
             await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -121,6 +130,11 @@ public class RegisterModel : PageModel
             if (result.Succeeded)
             {
                 _logger.LogInformation("User created a new account with password.");
+
+                if (Input.Tipo != "Cliente" && Input.Tipo != "Profissional")
+                    return BadRequest();
+
+                await _userManager.AddToRoleAsync(user, Input.Tipo);
 
                 var userId = await _userManager.GetUserIdAsync(user);
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
