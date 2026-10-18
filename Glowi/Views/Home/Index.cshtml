@@ -3,6 +3,13 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Bem vindo ao Glowi!</h1>
+    @if (User.IsInRole("Profissional"))
+    {
+        <p>Divulgue seu trabalho de maneira simplificada!</p>
+    }
+    @if (User.IsInRole("Cliente"))
+    {
+        <p>Agende seu serviço de beleza na palma da mão!</p>
+    }
 </div>

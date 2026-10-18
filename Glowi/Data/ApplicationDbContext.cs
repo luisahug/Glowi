@@ -13,10 +13,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Cliente> Clientes => Set<Cliente>();
     public DbSet<Profissional> Profissionais => Set<Profissional>();
+    public DbSet<Servico> Servico => Set<Servico>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(builder); // obrigatório: configura as tabelas do Identity
+        base.OnModelCreating(builder);
 
         builder.Entity<Cliente>()
             .HasOne(c => c.Usuario).WithOne()
@@ -25,5 +26,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Profissional>()
             .HasOne(p => p.Usuario).WithOne()
             .HasForeignKey<Profissional>(p => p.UsuarioId);
+
+        builder.Entity<Servico>().Property(s => s.Preco).HasPrecision(10, 2);
     }
 }

@@ -142,6 +142,35 @@ namespace Glowi.Data.Migrations
                     b.ToTable("Profissionais");
                 });
 
+            modelBuilder.Entity("Glowi.Models.Servico", b =>
+                {
+                    b.Property<int>("ServicoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ServicoId"));
+
+                    b.Property<int>("DuracaoMinutos")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Preco")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<int?>("ProfissionalId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ServicoId");
+
+                    b.HasIndex("ProfissionalId");
+
+                    b.ToTable("Servico");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -298,6 +327,15 @@ namespace Glowi.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Glowi.Models.Servico", b =>
+                {
+                    b.HasOne("Glowi.Models.Profissional", "Profissional")
+                        .WithMany()
+                        .HasForeignKey("ProfissionalId");
+
+                    b.Navigation("Profissional");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
