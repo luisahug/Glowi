@@ -1,14 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
+using Glowi.Data;
+using Glowi.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +11,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading;
+using System.Threading.Tasks;
 using Glowi.Models;
 
 namespace Glowi.Areas.Identity.Pages.Account;
@@ -28,21 +30,22 @@ public class RegisterModel : PageModel
     private readonly IUserStore<ApplicationUser> _userStore;
     private readonly IUserEmailStore<ApplicationUser> _emailStore;
     private readonly ILogger<RegisterModel> _logger;
-    private readonly IEmailSender _emailSender;
+    private readonly ApplicationDbContext _context;
 
     public RegisterModel(
         UserManager<ApplicationUser> userManager,
         IUserStore<ApplicationUser> userStore,
         SignInManager<ApplicationUser> signInManager,
         ILogger<RegisterModel> logger,
-        IEmailSender emailSender)
+        IEmailSender emailSender,
+        ApplicationDbContext context)
     {
         _userManager = userManager;
         _userStore = userStore;
         _emailStore = GetEmailStore();
         _signInManager = signInManager;
         _logger = logger;
-        _emailSender = emailSender;
+        _context = context;
     }
 
     /// <summary>
@@ -84,9 +87,9 @@ public class RegisterModel : PageModel
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [StringLength(100, ErrorMessage = "A {0} deve ter pelo menos {2} e no máximo {1} caracteres.", MinimumLength = 6)]
         [DataType(DataType.Password)]
-        [Display(Name = "Password")]
+        [Display(Name = "Senha")]
         public string Password { get; set; } = default!;
 
         /// <summary>
@@ -94,8 +97,8 @@ public class RegisterModel : PageModel
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         [DataType(DataType.Password)]
-        [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "Senha e confirmação não batem.")]
+        [Display(Name = "Confirmar Senha")]
+        [Compare("Password", ErrorMessage = "Senha e confirmação não conferem.")]
         public string? ConfirmPassword { get; set; }
 
         [Required]
@@ -105,6 +108,16 @@ public class RegisterModel : PageModel
         [Required]
         [Display(Name = "Tipo")] //profissional ou cliente
         public string Tipo { get; set; }
+
+        [Phone(ErrorMessage = "Telefone inválido.")]
+        [Display(Name = "Telefone")]
+        public string? Telefone { get; set; }
+
+        [Display(Name = "Especialidade")]
+        public string? Especialidade { get; set; }
+
+        [Display(Name = "Sobre você")]
+        public string? Biografia { get; set; }
     }
 
 
@@ -118,6 +131,10 @@ public class RegisterModel : PageModel
     {
         returnUrl ??= Url.Content("~/");
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+        if (Input.Tipo == "Profissional" && string.IsNullOrWhiteSpace(Input.Especialidade))
+            ModelState.AddModelError("Input.Especialidade", "Informe sua especialidade.");
+
         if (ModelState.IsValid)
         {
             var user = CreateUser();
@@ -136,6 +153,13 @@ public class RegisterModel : PageModel
 
                 await _userManager.AddToRoleAsync(user, Input.Tipo);
 
+                if (Input.Tipo == "Cliente")
+                    _context.Clientes.Add(new Cliente { UsuarioId = user.Id });
+                else
+                    _context.Profissionais.Add(new Profissional { UsuarioId = user.Id });
+
+                await _context.SaveChangesAsync();
+
                 var userId = await _userManager.GetUserIdAsync(user);
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -145,18 +169,29 @@ public class RegisterModel : PageModel
                     values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                     protocol: Request.Scheme)!;
 
-                await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
-                if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                if (Input.Tipo == "Cliente")
                 {
-                    return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+                    _context.Clientes.Add(new Cliente
+                    {
+                        UsuarioId = user.Id,
+                        Telefone = Input.Telefone
+                    });
                 }
                 else
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return LocalRedirect(returnUrl);
+                    _context.Profissionais.Add(new Profissional
+                    {
+                        UsuarioId = user.Id,
+                        Telefone = Input.Telefone,
+                        Especialidade = Input.Especialidade,
+                        Biografia = Input.Biografia
+                    });
                 }
+
+                await _context.SaveChangesAsync();
+
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return LocalRedirect(returnUrl);
             }
             foreach (var error in result.Errors)
             {

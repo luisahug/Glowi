@@ -21,30 +21,47 @@
                 <label asp-for="Input.Tipo">Tipo de conta</label>
                 <span asp-validation-for="Input.Tipo" class="text-danger"></span>
             </div>
+            <div id="camposProfissional" style="display: none;">
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Especialidade" class="form-control" placeholder="Ex.: Design de sobrancelhas" />
+                    <label asp-for="Input.Especialidade">Especialidade</label>
+                    <span asp-validation-for="Input.Especialidade" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <textarea asp-for="Input.Biografia" class="form-control" placeholder="Conte sobre você" style="height: 100px"></textarea>
+                    <label asp-for="Input.Biografia">Sobre você</label>
+                    <span asp-validation-for="Input.Biografia" class="text-danger"></span>
+                </div>
+            </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.Nome" class="form-control" autocomplete="name" aria-required="true" placeholder="Seu nome" />
                 <label asp-for="Input.Nome">Nome</label>
                 <span asp-validation-for="Input.Nome" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@exemplo.com" />
                 <label asp-for="Input.Email">Email</label>
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.Password">Password</label>
+                <input asp-for="Input.Telefone" class="form-control" autocomplete="tel" placeholder="(11) 99999-9999" />
+                <label asp-for="Input.Telefone">Telefone</label>
+                <span asp-validation-for="Input.Telefone" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="senha" />
+                <label asp-for="Input.Password">Senha</label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
+                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="senha" />
+                <label asp-for="Input.ConfirmPassword">Confirmar Senha</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Cadastrar</button>
         </form>
     </div>
-    <div class="col-md-6 col-md-offset-2">
+    @* <div class="col-md-6 col-md-offset-2">
         <section>
             <h3>Use another service to register.</h3>
             <hr />
@@ -73,9 +90,21 @@
                 }
             }
         </section>
-    </div>
+    </div> *@
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        const tipo = document.getElementById('Input_Tipo');
+        const camposProfissional = document.getElementById('camposProfissional');
+
+        function atualizarCampos() {
+            camposProfissional.style.display = tipo.value === 'Profissional' ? '' : 'none';
+        }
+
+        tipo.addEventListener('change', atualizarCampos);
+        atualizarCampos();
+    </script>
 }
