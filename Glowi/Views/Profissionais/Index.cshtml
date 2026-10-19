@@ -1,0 +1,32 @@
+﻿@model IEnumerable<Glowi.Models.Profissional>
+@{
+    ViewData["Title"] = "Profissionais";
+}
+
+<h1 class="h3 mb-4">Profissionais</h1>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">Nenhuma profissional disponível no momento.</p>
+}
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+    @foreach (var p in Model)
+    {
+        <div class="col">
+            <a asp-action="Detalhes" asp-route-id="@p.ProfissionalId" class="card h-100 text-decoration-none text-reset">
+                <div class="card-body">
+                    <h5 class="card-title">@p.Usuario?.Nome</h5>
+                    @if (!string.IsNullOrWhiteSpace(p.Especialidade))
+                    {
+                        <p class="card-text text-muted mb-2">@p.Especialidade</p>
+                    }
+                    <p class="card-text small">
+                        @p.Servicos.Count @(p.Servicos.Count == 1 ? "serviço" : "serviços")
+                        · a partir de @p.Servicos.Min(s => s.Preco).ToString("C")
+                    </p>
+                </div>
+            </a>
+        </div>
+    }
+</div>

@@ -8,5 +8,6 @@
         public string? Telefone { get; set; }
         public string? Especialidade { get; set; }
         public string? Biografia { get; set; }
+        public ICollection<Servico> Servicos { get; set; } = new List<Servico>();
     }
 }
