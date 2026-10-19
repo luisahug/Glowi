@@ -14,6 +14,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Cliente> Clientes => Set<Cliente>();
     public DbSet<Profissional> Profissionais => Set<Profissional>();
     public DbSet<Servico> Servico => Set<Servico>();
+    public DbSet<Disponibilidade> Disponibilidades => Set<Disponibilidade>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -26,6 +26,7 @@
                         @if (User.IsInRole("Profissional"))
                         {
                             <li class="nav-item"><a class="nav-link text-dark" asp-controller="Servicos" asp-action="Index">Meus serviços</a></li>
+                            <li class="nav-item"><a class="nav-link text-dark" asp-controller="Disponibilidades" asp-action="Index">Meus horários</a></li>
                         }
                         @if (User.IsInRole("Cliente"))
                         {

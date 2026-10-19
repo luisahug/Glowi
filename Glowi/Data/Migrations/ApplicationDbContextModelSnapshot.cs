@@ -113,6 +113,33 @@ namespace Glowi.Data.Migrations
                     b.ToTable("Clientes");
                 });
 
+            modelBuilder.Entity("Glowi.Models.Disponibilidade", b =>
+                {
+                    b.Property<int>("DisponibilidadeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("DisponibilidadeId"));
+
+                    b.Property<int>("DiaSemana")
+                        .HasColumnType("integer");
+
+                    b.Property<TimeOnly>("HoraFim")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<TimeOnly>("HoraInicio")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<int>("ProfissionalId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("DisponibilidadeId");
+
+                    b.HasIndex("ProfissionalId");
+
+                    b.ToTable("Disponibilidades");
+                });
+
             modelBuilder.Entity("Glowi.Models.Profissional", b =>
                 {
                     b.Property<int>("ProfissionalId")
@@ -318,6 +345,17 @@ namespace Glowi.Data.Migrations
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("Glowi.Models.Disponibilidade", b =>
+                {
+                    b.HasOne("Glowi.Models.Profissional", "Profissional")
+                        .WithMany()
+                        .HasForeignKey("ProfissionalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Profissional");
+                });
+
             modelBuilder.Entity("Glowi.Models.Profissional", b =>
                 {
                     b.HasOne("Glowi.Models.ApplicationUser", "Usuario")
@@ -332,7 +370,7 @@ namespace Glowi.Data.Migrations
             modelBuilder.Entity("Glowi.Models.Servico", b =>
                 {
                     b.HasOne("Glowi.Models.Profissional", "Profissional")
-                        .WithMany()
+                        .WithMany("Servicos")
                         .HasForeignKey("ProfissionalId");
 
                     b.Navigation("Profissional");
@@ -387,6 +425,11 @@ namespace Glowi.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Glowi.Models.Profissional", b =>
+                {
+                    b.Navigation("Servicos");
                 });
 #pragma warning restore 612, 618
         }
