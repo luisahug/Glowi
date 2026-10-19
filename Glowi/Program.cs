@@ -37,9 +37,13 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
 }
 
+app.UseStatusCodePagesWithReExecute("/Home/Status/{0}");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseExceptionHandler("/Home/Status/500");
+    app.UseHsts();
     app.UseMigrationsEndPoint();
 }
 else

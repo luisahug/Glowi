@@ -21,5 +21,12 @@ namespace Glowi.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        [Route("Home/Status/{codigo}")]
+        public IActionResult Status(int codigo)
+        {
+            ViewData["Codigo"] = codigo;
+            return View();
+        }
     }
 }
