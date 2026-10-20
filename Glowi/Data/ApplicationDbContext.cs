@@ -15,6 +15,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Profissional> Profissionais => Set<Profissional>();
     public DbSet<Servico> Servico => Set<Servico>();
     public DbSet<Disponibilidade> Disponibilidades => Set<Disponibilidade>();
+    public DbSet<Agendamento> Agendamentos => Set<Agendamento>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -29,5 +30,16 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey<Profissional>(p => p.UsuarioId);
 
         builder.Entity<Servico>().Property(s => s.Preco).HasPrecision(10, 2);
+
+        builder.Entity<Profissional>().Property(p => p.IntervaloMinutos).HasDefaultValue(15);
+        builder.Entity<Profissional>().Property(p => p.AntecedenciaMinimaHoras).HasDefaultValue(2);
+
+        builder.Entity<Agendamento>(a =>
+        {
+            a.HasOne(x => x.Cliente).WithMany().HasForeignKey(x => x.ClienteId).OnDelete(DeleteBehavior.Restrict);
+            a.HasOne(x => x.Profissional).WithMany().HasForeignKey(x => x.ProfissionalId).OnDelete(DeleteBehavior.Restrict);
+            a.HasOne(x => x.Servico).WithMany().HasForeignKey(x => x.ServicoId).OnDelete(DeleteBehavior.Restrict);
+            a.HasIndex(x => new { x.ProfissionalId, x.Inicio });
+        });
     }
 }

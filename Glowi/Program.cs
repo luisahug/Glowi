@@ -19,6 +19,8 @@ options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddScoped<Glowi.Services.AgendaService>();
+
 var app = builder.Build();
 
 var ptBR = new CultureInfo("pt-BR");

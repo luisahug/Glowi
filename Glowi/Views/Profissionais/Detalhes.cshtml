@@ -29,7 +29,10 @@
             </div>
             <div class="text-end">
                 <div class="fw-semibold mb-1">@s.Preco.ToString("C")</div>
-                <button type="button" class="btn btn-sm btn-primary" disabled>Agendar</button>
+                @if (User.IsInRole("Cliente"))
+                {
+                    <a class="btn btn-sm btn-primary" asp-controller="Agendamentos" asp-action="CriarNovoAgendamento" asp-route-servicoId="@s.ServicoId">Agendar</a>
+                }
             </div>
         </div>
     }

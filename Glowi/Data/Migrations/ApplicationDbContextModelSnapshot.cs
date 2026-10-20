@@ -22,6 +22,46 @@ namespace Glowi.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Glowi.Models.Agendamento", b =>
+                {
+                    b.Property<int>("AgendamentoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AgendamentoId"));
+
+                    b.Property<int>("ClienteId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Fim")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Inicio")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ProfissionalId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ServicoId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("AgendamentoId");
+
+                    b.HasIndex("ClienteId");
+
+                    b.HasIndex("ServicoId");
+
+                    b.HasIndex("ProfissionalId", "Inicio");
+
+                    b.ToTable("Agendamentos");
+                });
+
             modelBuilder.Entity("Glowi.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -148,11 +188,21 @@ namespace Glowi.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ProfissionalId"));
 
+                    b.Property<int>("AntecedenciaMinimaHoras")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(2);
+
                     b.Property<string>("Biografia")
                         .HasColumnType("text");
 
                     b.Property<string>("Especialidade")
                         .HasColumnType("text");
+
+                    b.Property<int>("IntervaloMinutos")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(15);
 
                     b.Property<string>("Telefone")
                         .HasColumnType("text");
@@ -332,6 +382,33 @@ namespace Glowi.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("Glowi.Models.Agendamento", b =>
+                {
+                    b.HasOne("Glowi.Models.Cliente", "Cliente")
+                        .WithMany()
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Glowi.Models.Profissional", "Profissional")
+                        .WithMany()
+                        .HasForeignKey("ProfissionalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Glowi.Models.Servico", "Servico")
+                        .WithMany()
+                        .HasForeignKey("ServicoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Cliente");
+
+                    b.Navigation("Profissional");
+
+                    b.Navigation("Servico");
                 });
 
             modelBuilder.Entity("Glowi.Models.Cliente", b =>
