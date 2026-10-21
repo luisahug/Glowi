@@ -1,5 +1,6 @@
 ﻿using Glowi.Data;
 using Glowi.Models;
+using Glowi.Models.Enum;
 using Glowi.Models.ViewModels.Agendamento;
 using Glowi.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -107,6 +108,59 @@ public class AgendamentosController : Controller
         }
 
         return RedirectToAction(nameof(FinalizarAgendamento), new { servicoId, inicio });
+    }
+
+    public async Task<IActionResult> MeusAgendamentos()
+    {
+        var clienteId = await ClienteLogadoIdAsync();
+        var agora = DateTime.UtcNow;
+
+        var agendamentos = await _context.Agendamentos
+            .Include(a => a.Servico)
+            .Include(a => a.Profissional).ThenInclude(p => p!.Usuario)
+            .Where(a => a.ClienteId == clienteId)
+            .ToListAsync();
+
+        var ativos = new[] { StatusAgendamento.Pendente, StatusAgendamento.Confirmado };
+
+        var vm = new MeusAgendamentosViewModel
+        {
+            Proximos = agendamentos
+                .Where(a => ativos.Contains(a.Status) && a.Fim > agora)
+                .OrderBy(a => a.Inicio)
+                .ToList(),
+            Historico = agendamentos
+                .Where(a => !ativos.Contains(a.Status) || a.Fim <= agora)
+                .OrderByDescending(a => a.Inicio)
+                .ToList()
+        };
+
+        return View(vm);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Cancelar(int id)
+    {
+        var clienteId = await ClienteLogadoIdAsync();
+
+        var agendamento = await _context.Agendamentos
+            .FirstOrDefaultAsync(a => a.AgendamentoId == id && a.ClienteId == clienteId);
+
+        if (agendamento == null)
+            return NotFound();
+
+        if (!agendamento.EmAberto)
+        {
+            TempData["Erro"] = "Esse agendamento não pode mais ser cancelado.";
+            return RedirectToAction(nameof(MeusAgendamentos));
+        }
+
+        agendamento.Status = StatusAgendamento.Cancelado;
+        await _context.SaveChangesAsync();
+
+        TempData["Sucesso"] = "Agendamento cancelado.";
+        return RedirectToAction(nameof(MeusAgendamentos));
     }
 
     public async Task<IActionResult> FinalizarAgendamento(int servicoId, string inicio)

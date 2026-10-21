@@ -8,7 +8,8 @@
     <h1 class="h3 mb-3">Pedido de agendamento enviado!</h1>
     <p class="lead mb-1">@s.Nome com @s.Profissional?.Usuario?.Nome</p>
     <p class="mb-4">@Model.Inicio.ToString("dddd, dd 'de' MMMM 'às' HH:mm")</p>
-    <p class="text-muted mb-4">O horário já está reservado para você.</p>
+    <p class="text-muted mb-4">O horário já está reservado para você. Agora é só aguardar a confirmação da profissional.</p>
 
+    <a asp-action="MeusAgendamentos" class="btn btn-primary">Meus agendamentos</a>
     <a asp-controller="Profissionais" asp-action="Index" class="btn btn-outline-primary">Ver profissionais</a>
 </div>

@@ -14,7 +14,8 @@ public class AgendaService
         _context = context;
     }
 
-    public async Task<List<DateTime>> ObterHorariosLivres(int servicoId, DateOnly data)
+    // ignorarAgendamentoId: usado no reagendamento, para o próprio agendamento não bloquear os horários vizinhos
+    public async Task<List<DateTime>> ObterHorariosLivres(int servicoId, DateOnly data, int? ignorarAgendamentoId = null)
     {
         var servico = await _context.Servico
             .Include(s => s.Profissional)
@@ -38,6 +39,7 @@ public class AgendaService
 
         var ocupados = (await _context.Agendamentos
                 .Where(a => a.ProfissionalId == prof.ProfissionalId
+                         && (ignorarAgendamentoId == null || a.AgendamentoId != ignorarAgendamentoId)
                          && a.Status != StatusAgendamento.Cancelado
                          && a.Status != StatusAgendamento.Recusado
                          && a.Inicio < fimDia
@@ -76,12 +78,14 @@ public class AgendaService
         if (!livres.Contains(inicioBrasilia))
             return "Esse horário não está mais disponível. Escolha outro.";
 
-        var servico = await _context.Servico.FirstAsync(s => s.ServicoId == servicoId);
+        var servico = await _context.Servico
+            .Include(s => s.Profissional)
+            .FirstAsync(s => s.ServicoId == servicoId);
 
         var agendamento = new Agendamento
         {
             ClienteId = clienteId,
-            ProfissionalId = servico.Profissional.ProfissionalId,
+            ProfissionalId = servico.Profissional!.ProfissionalId,
             ServicoId = servicoId,
             Inicio = Horario.ParaUtc(inicioBrasilia),
             Fim = Horario.ParaUtc(inicioBrasilia.AddMinutes(servico.DuracaoMinutos)),
@@ -98,6 +102,31 @@ public class AgendaService
         catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException { SqlState: "23P01" })
         {
             _context.Entry(agendamento).State = EntityState.Detached;
+            return "Esse horário acabou de ser reservado. Escolha outro.";
+        }
+    }
+
+    // a profissional escolhe o novo horário, então o agendamento já fica confirmado
+    public async Task<string?> Reagendar(Agendamento agendamento, DateTime novoInicioBrasilia)
+    {
+        var livres = await ObterHorariosLivres(agendamento.ServicoId, DateOnly.FromDateTime(novoInicioBrasilia), agendamento.AgendamentoId);
+        if (!livres.Contains(novoInicioBrasilia))
+            return "Esse horário não está disponível. Escolha outro.";
+
+        var servico = await _context.Servico.FirstAsync(s => s.ServicoId == agendamento.ServicoId);
+
+        agendamento.Inicio = Horario.ParaUtc(novoInicioBrasilia);
+        agendamento.Fim = Horario.ParaUtc(novoInicioBrasilia.AddMinutes(servico.DuracaoMinutos));
+        agendamento.Status = StatusAgendamento.Confirmado;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+            return null;
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException { SqlState: "23P01" })
+        {
+            await _context.Entry(agendamento).ReloadAsync();
             return "Esse horário acabou de ser reservado. Escolha outro.";
         }
     }

@@ -24,11 +24,11 @@
     <div class="alert alert-warning">@erro</div>
 }
 
-<form method="get" asp-action="Novo" class="d-flex flex-wrap align-items-end gap-2 mb-4">
+<form method="get" asp-action="CriarNovoAgendamento" class="d-flex flex-wrap align-items-end gap-2 mb-4">
     <input type="hidden" name="servicoId" value="@s.ServicoId" />
 
     <a class="btn btn-outline-secondary @(diaAnterior < Model.Hoje ? "disabled" : "")"
-       asp-action="Novo" asp-route-servicoId="@s.ServicoId"
+       asp-action="CriarNovoAgendamento" asp-route-servicoId="@s.ServicoId"
        asp-route-data="@diaAnterior.ToString("yyyy-MM-dd", inv)" aria-label="Dia anterior">&larr;</a>
 
     <div class="form-floating">

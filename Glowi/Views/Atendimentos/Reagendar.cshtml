@@ -1,0 +1,70 @@
+@model Glowi.Models.ViewModels.Agendamento.ReagendarViewModel
+@using System.Globalization
+@using Glowi.Services
+@{
+    ViewData["Title"] = "Reagendar";
+    var inv = CultureInfo.InvariantCulture;
+    var a = Model.Agendamento;
+    var atual = Horario.ParaBrasilia(a.Inicio);
+    var diaAnterior = Model.Data.AddDays(-1);
+    var proximoDia = Model.Data.AddDays(1);
+}
+
+<a asp-action="Index" class="d-inline-block mb-3">&larr; Voltar</a>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h1 class="h4 mb-1">Reagendar @a.Servico?.Nome</h1>
+        <p class="text-muted mb-0">
+            @a.Cliente?.Usuario?.Nome · horário atual: @atual.ToString("dddd, dd/MM 'às' HH:mm")
+        </p>
+    </div>
+</div>
+
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-warning">@erro</div>
+}
+
+<form method="get" asp-action="Reagendar" class="d-flex flex-wrap align-items-end gap-2 mb-4">
+    <input type="hidden" name="id" value="@a.AgendamentoId" />
+
+    <a class="btn btn-outline-secondary @(diaAnterior < Model.Hoje ? "disabled" : "")"
+       asp-action="Reagendar" asp-route-id="@a.AgendamentoId"
+       asp-route-data="@diaAnterior.ToString("yyyy-MM-dd", inv)" aria-label="Dia anterior">&larr;</a>
+
+    <div class="form-floating">
+        <input type="date" name="data" id="campoData" class="form-control"
+               value="@Model.Data.ToString("yyyy-MM-dd", inv)"
+               min="@Model.Hoje.ToString("yyyy-MM-dd", inv)"
+               max="@Model.Maximo.ToString("yyyy-MM-dd", inv)"
+               onchange="this.form.submit()" />
+        <label for="campoData">Data</label>
+    </div>
+
+    <a class="btn btn-outline-secondary @(proximoDia > Model.Maximo ? "disabled" : "")"
+       asp-action="Reagendar" asp-route-id="@a.AgendamentoId"
+       asp-route-data="@proximoDia.ToString("yyyy-MM-dd", inv)" aria-label="Próximo dia">&rarr;</a>
+</form>
+
+<h2 class="h5 mb-3">Horários livres em @Model.Data.ToString("dddd, dd/MM")</h2>
+
+@if (!Model.Horarios.Any())
+{
+    <div class="alert alert-light border">Nenhum horário livre nesse dia. Tente outra data.</div>
+}
+else
+{
+    <div class="d-flex flex-wrap gap-2">
+        @foreach (var h in Model.Horarios)
+        {
+            <form method="post" asp-action="Reagendar" asp-route-id="@a.AgendamentoId"
+                  onsubmit="return confirm('Remarcar para @h.ToString("dd/MM") às @h.ToString("HH:mm")?');">
+                <input type="hidden" name="inicio" value="@h.ToString("yyyy-MM-ddTHH:mm", inv)" />
+                <button type="submit" class="btn @(h == atual ? "btn-primary" : "btn-outline-primary")">
+                    @h.ToString("HH:mm")
+                </button>
+            </form>
+        }
+    </div>
+}

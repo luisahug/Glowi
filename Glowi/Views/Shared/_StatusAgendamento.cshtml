@@ -1,0 +1,18 @@
+@model Glowi.Models.Agendamento
+@using Glowi.Models.Enum
+@{
+    var (texto, cor) = Model.Status switch
+    {
+        StatusAgendamento.Pendente => ("Pendente", "bg-warning text-dark"),
+        StatusAgendamento.Confirmado => ("Confirmado", "bg-success"),
+        StatusAgendamento.Cancelado => ("Cancelado", "bg-secondary"),
+        StatusAgendamento.Recusado => ("Recusado", "bg-danger"),
+        _ => (Model.Status.ToString(), "bg-light text-dark")
+    };
+}
+
+<span class="badge @cor">@texto</span>
+@if (Model.Status != StatusAgendamento.Cancelado && Model.Status != StatusAgendamento.Recusado)
+{
+    <span class="small text-muted ms-1">Concluído: <strong>@(Model.Concluido ? "Sim" : "Não")</strong></span>
+}
