@@ -1,0 +1,168 @@
+@model Glowi.Models.ViewModels.Agendamento.AgendaViewModel
+@using System.Globalization
+@using Glowi.Models.Enum
+@using Glowi.Services
+@{
+    ViewData["Title"] = "Agenda";
+    var inv = CultureInfo.InvariantCulture;
+    var visao = Model.Semanal ? "semana" : "dia";
+    var urlAtual = Context.Request.Path + Context.Request.QueryString;
+    var ultimoDia = Model.Dias.Last().Dia;
+
+    var periodo = Model.Semanal
+        ? $"{Model.Data:dd/MM} a {ultimoDia:dd/MM/yyyy}"
+        : Model.Data.ToString("dddd, dd 'de' MMMM 'de' yyyy");
+    var mostraHoje = Model.Semanal
+        ? Model.Hoje < Model.Data || Model.Hoje > ultimoDia
+        : Model.Hoje != Model.Data;
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0">Agenda</h1>
+
+    <div class="btn-group" role="group" aria-label="Visão">
+        <a class="btn btn-sm @(Model.Semanal ? "btn-outline-primary" : "btn-primary")"
+           asp-action="Agenda" asp-route-visao="dia" asp-route-data="@Model.Data.ToString("yyyy-MM-dd", inv)">Dia</a>
+        <a class="btn btn-sm @(Model.Semanal ? "btn-primary" : "btn-outline-primary")"
+           asp-action="Agenda" asp-route-visao="semana" asp-route-data="@Model.Data.ToString("yyyy-MM-dd", inv)">Semana</a>
+    </div>
+</div>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @sucesso
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @erro
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+}
+
+<form method="get" asp-action="Agenda" class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <input type="hidden" name="visao" value="@visao" />
+
+    <a class="btn btn-outline-secondary" asp-action="Agenda" asp-route-visao="@visao"
+       asp-route-data="@Model.Anterior.ToString("yyyy-MM-dd", inv)"
+       aria-label="@(Model.Semanal ? "Semana anterior" : "Dia anterior")">&larr;</a>
+
+    <input type="date" name="data" class="form-control w-auto" aria-label="Escolher data"
+           value="@Model.Data.ToString("yyyy-MM-dd", inv)" onchange="this.form.submit()" />
+
+    <a class="btn btn-outline-secondary" asp-action="Agenda" asp-route-visao="@visao"
+       asp-route-data="@Model.Proximo.ToString("yyyy-MM-dd", inv)"
+       aria-label="@(Model.Semanal ? "Próxima semana" : "Próximo dia")">&rarr;</a>
+
+    @if (mostraHoje)
+    {
+        <a class="btn btn-link" asp-action="Agenda" asp-route-visao="@visao">Hoje</a>
+    }
+</form>
+
+<div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2 mb-3">
+    <div class="fw-semibold text-capitalize">@periodo</div>
+    <div class="small text-muted">
+        @Model.Total @(Model.Total == 1 ? "agendamento" : "agendamentos")
+        · previsto (confirmados): @Model.FaturamentoPrevisto.ToString("C")
+    </div>
+</div>
+
+@if (Model.Semanal)
+{
+    <div class="agenda-semana mb-4">
+        @foreach (var dia in Model.Dias)
+        {
+            var ehHoje = dia.Dia == Model.Hoje;
+            <div class="card @(ehHoje ? "border-primary" : "")">
+                <a class="card-header text-decoration-none d-flex justify-content-between @(ehHoje ? "bg-primary text-white" : "text-dark")"
+                   asp-action="Agenda" asp-route-visao="dia" asp-route-data="@dia.Dia.ToString("yyyy-MM-dd", inv)">
+                    <span class="text-capitalize">@dia.Dia.ToString("ddd")</span>
+                    <span>@dia.Dia.ToString("dd/MM")</span>
+                </a>
+                <div class="card-body p-2">
+                    @if (!dia.Agendamentos.Any())
+                    {
+                        <div class="small text-muted">Livre</div>
+                    }
+                    @foreach (var a in dia.Agendamentos)
+                    {
+                        var inicio = Horario.ParaBrasilia(a.Inicio);
+                        var fim = Horario.ParaBrasilia(a.Fim);
+                        var pendente = a.Status == StatusAgendamento.Pendente;
+                        <div class="agenda-item small mb-2 @(pendente ? "agenda-item-pendente" : "agenda-item-confirmado")">
+                            <div class="fw-semibold">@inicio.ToString("HH:mm")–@fim.ToString("HH:mm")</div>
+                            <div class="text-truncate">@a.Cliente?.Usuario?.Nome</div>
+                            <div class="text-truncate text-muted">@a.Servico?.Nome</div>
+                            @if (pendente)
+                            {
+                                <span class="badge bg-warning text-dark">Pendente</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    var dia = Model.Dias.Single();
+
+    @if (!dia.Agendamentos.Any())
+    {
+        <div class="alert alert-light border">Nenhum agendamento neste dia.</div>
+    }
+
+    <div class="list-group mb-4">
+        @foreach (var a in dia.Agendamentos)
+        {
+            var inicio = Horario.ParaBrasilia(a.Inicio);
+            var fim = Horario.ParaBrasilia(a.Fim);
+            var nomeCliente = a.Cliente?.Usuario?.Nome;
+            var linkWhatsApp = WhatsApp.Link(a.Cliente?.Telefone,
+                $"Olá, {nomeCliente}! Aqui é do Glowi, sobre seu agendamento de {a.Servico?.Nome} em {inicio:dd/MM 'às' HH:mm}.");
+
+            <div class="list-group-item py-3 agenda-item @(a.Status == StatusAgendamento.Pendente ? "agenda-item-pendente" : "agenda-item-confirmado")">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                    <div class="d-flex gap-3">
+                        <div class="text-nowrap">
+                            <div class="fw-semibold fs-5">@inicio.ToString("HH:mm")</div>
+                            <div class="small text-muted">até @fim.ToString("HH:mm")</div>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">@nomeCliente</div>
+                            <div>@a.Servico?.Nome · @a.Servico?.Preco.ToString("C")</div>
+                            <div class="text-muted small">@(a.Cliente?.Telefone ?? "Sem telefone cadastrado")</div>
+                            <div class="mt-1"><partial name="_StatusAgendamento" model="a" /></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (a.Status == StatusAgendamento.Pendente && a.EmAberto)
+                        {
+                            <form method="post" asp-action="Confirmar" asp-route-id="@a.AgendamentoId" asp-route-returnUrl="@urlAtual">
+                                <button type="submit" class="btn btn-sm btn-success">Confirmar</button>
+                            </form>
+                            <form method="post" asp-action="Recusar" asp-route-id="@a.AgendamentoId" asp-route-returnUrl="@urlAtual"
+                                  onsubmit="return confirm('Recusar este pedido?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Recusar</button>
+                            </form>
+                        }
+                        @if (a.EmAberto)
+                        {
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Reagendar" asp-route-id="@a.AgendamentoId">Reagendar</a>
+                        }
+                        @if (linkWhatsApp != null)
+                        {
+                            <a class="btn btn-sm btn-outline-secondary" href="@linkWhatsApp" target="_blank" rel="noopener">Mensagem</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

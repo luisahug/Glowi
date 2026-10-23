@@ -33,6 +33,7 @@
                         </li>
                         @if (User.IsInRole("Profissional"))
                         {
+                            <li class="nav-item"><a class="nav-link text-dark" asp-controller="Atendimentos" asp-action="Agenda">Agenda</a></li>
                             <li class="nav-item"><a class="nav-link text-dark" asp-controller="Atendimentos" asp-action="Index">Meus agendamentos</a></li>
                             <li class="nav-item"><a class="nav-link text-dark" asp-controller="Servicos" asp-action="Index">Meus serviços</a></li>
                             <li class="nav-item"><a class="nav-link text-dark" asp-controller="Disponibilidades" asp-action="Index">Meus horários</a></li>

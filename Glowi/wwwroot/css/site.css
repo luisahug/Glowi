@@ -29,3 +29,28 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+/* Agenda da profissional */
+.agenda-semana {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .5rem;
+}
+
+@media (min-width: 992px) {
+  .agenda-semana {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+
+.agenda-item {
+  border-left: 4px solid transparent;
+  padding-left: .5rem;
+}
+
+.agenda-item-confirmado {
+  border-left-color: var(--bs-success);
+}
+
+.agenda-item-pendente {
+  border-left-color: var(--bs-warning);
+}
