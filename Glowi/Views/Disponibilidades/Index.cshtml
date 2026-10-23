@@ -12,23 +12,12 @@
     string NomeDia(DayOfWeek d) => cultura.TextInfo.ToTitleCase(cultura.DateTimeFormat.GetDayName(d));
 }
 
-<h1 class="h3 mb-1">Meus horários</h1>
-<p class="text-muted mb-4">Defina em quais horários você atende em cada dia da semana. As clientes só conseguem agendar dentro desses horários.</p>
+<div class="page-header">
+    <h1>Meus horários</h1>
+    <p>Defina em quais horários você atende em cada dia da semana. As clientes só conseguem agendar dentro desses horários.</p>
+</div>
 
-@if (TempData["Sucesso"] is string sucesso)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @sucesso
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    </div>
-}
-@if (TempData["Erro"] is string erro)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @erro
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    </div>
-}
+<partial name="_Alertas" />
 
 <div class="list-group">
     @foreach (var dia in dias)
@@ -42,22 +31,22 @@
                 <div class="d-flex flex-wrap gap-2 flex-grow-1">
                     @if (!doDia.Any())
                     {
-                        <span class="text-muted small">Não atende</span>
+                        <span class="badge badge-soft-secondary">Não atende</span>
                     }
                     @foreach (var h in doDia)
                     {
-                        <button type="button" class="btn btn-sm btn-outline-secondary btn-remover"
+                        <button type="button" class="btn btn-sm btn-secondary btn-remover"
                                 data-id="@h.DisponibilidadeId"
                                 data-texto="@NomeDia(dia), @h.HoraInicio.ToString("HH:mm") às @h.HoraFim.ToString("HH:mm")"
                                 title="Clique para remover">
-                            @h.HoraInicio.ToString("HH:mm") – @h.HoraFim.ToString("HH:mm") &times;
+                            @h.HoraInicio.ToString("HH:mm") – @h.HoraFim.ToString("HH:mm") <i class="bi bi-x-lg ms-1"></i>
                         </button>
                     }
                 </div>
 
-                <button type="button" class="btn btn-sm btn-primary"
+                <button type="button" class="btn btn-sm btn-outline-primary"
                         data-bs-toggle="modal" data-bs-target="#modalHorario" data-dia="@((int)dia)">
-                    + Adicionar
+                    <i class="bi bi-plus-lg"></i> Adicionar
                 </button>
             </div>
         </div>

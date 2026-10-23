@@ -4,12 +4,13 @@
 // Arquivos estáticos (css, js, lib, ícones) usam stale-while-revalidate.
 
 // Altere a versão para forçar a limpeza do cache antigo.
-const CACHE = 'glowi-v1';
+const CACHE = 'glowi-v2';
 const OFFLINE_URL = '/offline.html';
 
 const PRECACHE = [
     OFFLINE_URL,
     '/lib/bootstrap/dist/css/bootstrap.min.css',
+    '/css/glowi.css',
     '/icons/icon-192.png'
 ];
 

@@ -3,31 +3,20 @@
     ViewData["Title"] = "Meus serviços";
 }
 
-<h1 class="h3 mb-4">Meus serviços</h1>
+<div class="page-header">
+    <h1>Meus serviços</h1>
+    <p>Toque em um serviço para editar.</p>
+</div>
 
-@if (TempData["Sucesso"] is string sucesso)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @sucesso
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    </div>
-}
-@if (TempData["Erro"] is string erro)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @erro
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    </div>
-}
+<partial name="_Alertas" />
 
 <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
 
     <div class="col">
-        <button type="button" class="card h-100 w-100 p-0 text-center text-muted"
-                style="border-style: dashed; border-width: 2px;"
+        <button type="button" class="card card-add h-100 w-100 p-0 text-center"
                 data-bs-toggle="modal" data-bs-target="#modalServico" data-modo="novo">
             <div class="card-body d-flex flex-column justify-content-center align-items-center w-100">
-                <span class="fs-1 lh-1">+</span>
+                <i class="bi bi-plus-circle fs-2 mb-1"></i>
                 <span>Novo serviço</span>
             </div>
         </button>
@@ -45,8 +34,8 @@
                     data-preco="@s.Preco.ToString("0.00")">
                 <div class="card-body w-100">
                     <h5 class="card-title">@s.Nome</h5>
-                    <p class="card-text text-muted mb-1">@s.DuracaoMinutos min</p>
-                    <p class="card-text fw-semibold">@s.Preco.ToString("C")</p>
+                    <p class="card-text text-muted mb-1"><i class="bi bi-clock me-1"></i>@s.DuracaoMinutos min</p>
+                    <p class="card-text price mb-0">@s.Preco.ToString("C")</p>
                 </div>
             </button>
         </div>

@@ -12,31 +12,24 @@
     };
 }
 
-<h1 class="h3 mb-4">Meus agendamentos</h1>
+<div class="page-header">
+    <h1>Agendamentos</h1>
+    <p>Confirme pedidos, reagende e fale com suas clientes.</p>
+</div>
 
-@if (TempData["Sucesso"] is string sucesso)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @sucesso
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    </div>
-}
-@if (TempData["Erro"] is string erro)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @erro
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    </div>
-}
+<partial name="_Alertas" />
 
 @if (!Model.Pendentes.Any() && !Model.Proximos.Any())
 {
-    <div class="alert alert-light border mb-4">Nenhum agendamento marcado por enquanto.</div>
+    <div class="empty-state mb-4">
+        <span class="icon-box"><i class="bi bi-calendar-heart"></i></span>
+        <p>Nenhum agendamento marcado por enquanto.</p>
+    </div>
 }
 
 @foreach (var secao in secoes.Where(s => s.Itens.Any()))
 {
-    <h2 class="h5 mb-3">@secao.Titulo</h2>
+    <h2 class="section-title">@secao.Titulo</h2>
 
     <div class="list-group mb-4">
         @foreach (var a in secao.Itens)
@@ -52,9 +45,9 @@
                     <div>
                         <div class="fw-semibold">@nomeCliente</div>
                         <div class="text-muted small">@(a.Cliente?.Telefone ?? "Sem telefone cadastrado")</div>
-                        <div>@a.Servico?.Nome · @a.Servico?.Preco.ToString("C")</div>
-                        <div>@inicio.ToString("dddd, dd/MM 'às' HH:mm") – @fim.ToString("HH:mm")</div>
-                        <div class="mt-1"><partial name="_StatusAgendamento" model="a" /></div>
+                        <div>@a.Servico?.Nome · <span class="price">@a.Servico?.Preco.ToString("C")</span></div>
+                        <div><i class="bi bi-calendar3 text-muted me-1"></i>@inicio.ToString("dddd, dd/MM 'às' HH:mm") – @fim.ToString("HH:mm")</div>
+                        <div class="mt-2"><partial name="_StatusAgendamento" model="a" /></div>
                     </div>
 
                     <div class="d-flex flex-wrap gap-2">
@@ -74,7 +67,7 @@
                         }
                         @if (linkWhatsApp != null)
                         {
-                            <a class="btn btn-sm btn-outline-secondary" href="@linkWhatsApp" target="_blank" rel="noopener">Mensagem</a>
+                            <a class="btn btn-sm btn-outline-secondary" href="@linkWhatsApp" target="_blank" rel="noopener"><i class="bi bi-whatsapp text-success"></i> Mensagem</a>
                         }
                     </div>
                 </div>

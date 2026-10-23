@@ -1,15 +1,100 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@{
+    ViewData["Title"] = "Início";
+
+    var atalhos = new List<(string Controller, string Action, string Icone, string Cor, string Titulo, string Texto)>();
+    if (User.IsInRole("Profissional"))
+    {
+        atalhos.Add(("Atendimentos", "Agenda", "bi-calendar-week", "", "Agenda", "Sua semana e seu dia de atendimentos"));
+        atalhos.Add(("Atendimentos", "Index", "bi-bell", "icon-box-pink", "Agendamentos", "Confirme, recuse ou reagende pedidos"));
+        atalhos.Add(("Servicos", "Index", "bi-stars", "icon-box-amber", "Meus serviços", "Cadastre preços e duração"));
+        atalhos.Add(("Disponibilidades", "Index", "bi-clock", "icon-box-teal", "Meus horários", "Defina quando você atende"));
+    }
+    if (User.IsInRole("Cliente"))
+    {
+        atalhos.Add(("Profissionais", "Index", "bi-search-heart", "", "Agendar", "Encontre profissionais e serviços"));
+        atalhos.Add(("Agendamentos", "MeusAgendamentos", "bi-calendar-check", "icon-box-pink", "Meus agendamentos", "Acompanhe seus horários marcados"));
+    }
+
+    var hora = Glowi.Services.Horario.Agora.Hour;
+    var saudacao = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Bem vindo ao Glowi!</h1>
-    @if (User.IsInRole("Profissional"))
-    {
-        <p>Divulgue seu trabalho de maneira simplificada!</p>
-    }
-    @if (User.IsInRole("Cliente"))
-    {
-        <p>Agende seu serviço de beleza na palma da mão!</p>
-    }
-</div>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    var usuario = await UserManager.GetUserAsync(User);
+    var primeiroNome = (usuario?.Nome ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+
+    <section class="hero fade-up mb-4">
+        <div class="hero-eyebrow">@saudacao</div>
+        <h1 class="hero-title">Olá@(primeiroNome is null ? "" : $", {primeiroNome}")! ✨</h1>
+        <p class="hero-text">
+            @(User.IsInRole("Profissional")
+                ? "Divulgue seu trabalho e organize sua agenda de maneira simplificada."
+                : "Agende seu serviço de beleza na palma da mão.")
+        </p>
+    </section>
+
+    <h2 class="section-title">O que você quer fazer?</h2>
+
+    <div class="row row-cols-2 row-cols-lg-4 g-3">
+        @foreach (var a in atalhos)
+        {
+            <div class="col">
+                <a class="tile" asp-controller="@a.Controller" asp-action="@a.Action">
+                    <span class="icon-box @a.Cor"><i class="bi @a.Icone"></i></span>
+                    <i class="bi bi-arrow-right tile-arrow"></i>
+                    <div>
+                        <h3 class="tile-title">@a.Titulo</h3>
+                        <p class="tile-text">@a.Texto</p>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <section class="hero fade-up text-center py-5 mb-4">
+        <img src="~/icons/icon-192.png" alt="Glowi" class="auth-logo mb-3" />
+        <h1 class="hero-title">Sua beleza, no seu horário.</h1>
+        <p class="hero-text mx-auto mb-4">
+            O Glowi conecta você às melhores profissionais de estética. Escolha o serviço, veja os horários livres e agende em segundos.
+        </p>
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+            <a class="btn btn-lg btn-light fw-bold text-primary px-4" asp-area="Identity" asp-page="/Account/Register">Criar conta grátis</a>
+            <a class="btn btn-lg btn-outline-light px-4" asp-area="Identity" asp-page="/Account/Login">Já tenho conta</a>
+        </div>
+    </section>
+
+    <div class="row row-cols-1 row-cols-md-3 g-3">
+        <div class="col">
+            <div class="card h-100"><div class="card-body feature">
+                <span class="icon-box"><i class="bi bi-search-heart"></i></span>
+                <div>
+                    <h3 class="h6 mb-1">Encontre profissionais</h3>
+                    <p class="small text-muted mb-0">Veja serviços, preços e duração antes de agendar.</p>
+                </div>
+            </div></div>
+        </div>
+        <div class="col">
+            <div class="card h-100"><div class="card-body feature">
+                <span class="icon-box icon-box-pink"><i class="bi bi-calendar-heart"></i></span>
+                <div>
+                    <h3 class="h6 mb-1">Agende em segundos</h3>
+                    <p class="small text-muted mb-0">Só aparecem horários realmente livres.</p>
+                </div>
+            </div></div>
+        </div>
+        <div class="col">
+            <div class="card h-100"><div class="card-body feature">
+                <span class="icon-box icon-box-teal"><i class="bi bi-briefcase"></i></span>
+                <div>
+                    <h3 class="h6 mb-1">É profissional?</h3>
+                    <p class="small text-muted mb-0">Organize sua agenda, serviços e horários num só lugar.</p>
+                </div>
+            </div></div>
+        </div>
+    </div>
+}

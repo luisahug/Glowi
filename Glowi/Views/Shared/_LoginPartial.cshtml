@@ -3,25 +3,35 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
-<ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
-    <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Olá @User.Identity?.Name!</a>
-    </li>
-    <li class="nav-item">
-        <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button  type="submit" class="nav-link btn btn-link text-dark">Sair</button>
-        </form>
-    </li>
+    var usuario = await UserManager.GetUserAsync(User);
+    var nome = string.IsNullOrWhiteSpace(usuario?.Nome) ? User.Identity?.Name ?? "" : usuario.Nome;
+    var inicial = nome.Length > 0 ? nome[..1] : "?";
+
+    <div class="dropdown">
+        <button type="button" class="avatar" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu da conta">
+            @inicial
+        </button>
+        <div class="dropdown-menu dropdown-menu-end">
+            <div class="px-3 py-2">
+                <div class="fw-semibold text-truncate" style="max-width: 14rem;">@nome</div>
+                <div class="small text-muted text-truncate" style="max-width: 14rem;">@User.Identity?.Name</div>
+            </div>
+            <hr class="dropdown-divider" />
+            <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                <i class="bi bi-person"></i> Minha conta
+            </a>
+            <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                <button type="submit" class="dropdown-item text-danger">
+                    <i class="bi bi-box-arrow-right"></i> Sair
+                </button>
+            </form>
+        </div>
+    </div>
 }
 else
 {
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Cadastrar</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-    </li>
+    <a class="btn btn-sm btn-link" asp-area="Identity" asp-page="/Account/Login">Entrar</a>
+    <a class="btn btn-sm btn-primary" asp-area="Identity" asp-page="/Account/Register">Criar conta</a>
 }
-</ul>

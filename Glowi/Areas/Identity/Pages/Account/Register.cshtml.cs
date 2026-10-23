@@ -152,13 +152,6 @@ public class RegisterModel : PageModel
 
                 await _userManager.AddToRoleAsync(user, Input.Tipo);
 
-                if (Input.Tipo == "Cliente")
-                    _context.Clientes.Add(new Cliente { UsuarioId = user.Id });
-                else
-                    _context.Profissionais.Add(new Profissional { UsuarioId = user.Id });
-
-                await _context.SaveChangesAsync();
-
                 var userId = await _userManager.GetUserIdAsync(user);
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

@@ -3,16 +3,19 @@
 @{
     var (texto, cor) = Model.Status switch
     {
-        StatusAgendamento.Pendente => ("Pendente", "bg-warning text-dark"),
-        StatusAgendamento.Confirmado => ("Confirmado", "bg-success"),
-        StatusAgendamento.Cancelado => ("Cancelado", "bg-secondary"),
-        StatusAgendamento.Recusado => ("Recusado", "bg-danger"),
-        _ => (Model.Status.ToString(), "bg-light text-dark")
+        StatusAgendamento.Pendente => ("Pendente", "badge-soft-warning"),
+        StatusAgendamento.Confirmado => ("Confirmado", "badge-soft-success"),
+        StatusAgendamento.Cancelado => ("Cancelado", "badge-soft-secondary"),
+        StatusAgendamento.Recusado => ("Recusado", "badge-soft-danger"),
+        _ => (Model.Status.ToString(), "badge-soft-secondary")
     };
 }
 
 <span class="badge @cor">@texto</span>
 @if (Model.Status != StatusAgendamento.Cancelado && Model.Status != StatusAgendamento.Recusado)
 {
-    <span class="small text-muted ms-1">Concluído: <strong>@(Model.Concluido ? "Sim" : "Não")</strong></span>
+    <span class="small text-muted ms-1">
+        <i class="bi @(Model.Concluido ? "bi-check-circle-fill text-success" : "bi-circle")"></i>
+        @(Model.Concluido ? "Concluído" : "Não concluído")
+    </span>
 }

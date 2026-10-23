@@ -1,0 +1,145 @@
+@{
+    ViewData["Title"] = "Guia de estilo";
+    var tons = new[] { "50", "100", "200", "300", "400", "500", "600", "700", "800", "900" };
+}
+
+<div class="page-header">
+    <h1>Guia de estilo</h1>
+    <p>Componentes da biblioteca <code>wwwroot/css/glowi.css</code>. Visível só em desenvolvimento.</p>
+</div>
+
+<h2 class="section-title">Cores</h2>
+<div class="d-flex flex-wrap gap-2 mb-3">
+    @foreach (var t in tons)
+    {
+        <div class="text-center small">
+            <div style="width: 3.5rem; height: 3.5rem; border-radius: .75rem; background: var(--glowi-@t); border: 1px solid var(--glowi-border);"></div>
+            <div class="mt-1 text-muted">@t</div>
+        </div>
+    }
+</div>
+<div class="hero py-4 mb-2"><div class="fw-semibold">--glowi-gradient</div></div>
+
+<h2 class="section-title">Hero</h2>
+<section class="hero">
+    <div class="hero-eyebrow">Boa tarde</div>
+    <h3 class="hero-title">Olá, Maria! ✨</h3>
+    <p class="hero-text">Texto de apoio do hero.</p>
+</section>
+
+<h2 class="section-title">Tiles (atalhos)</h2>
+<div class="row row-cols-2 row-cols-lg-4 g-3">
+    <div class="col"><a class="tile" href="#"><span class="icon-box"><i class="bi bi-calendar-week"></i></span><i class="bi bi-arrow-right tile-arrow"></i><div><h3 class="tile-title">.icon-box</h3><p class="tile-text">Roxo (padrão)</p></div></a></div>
+    <div class="col"><a class="tile" href="#"><span class="icon-box icon-box-pink"><i class="bi bi-bell"></i></span><i class="bi bi-arrow-right tile-arrow"></i><div><h3 class="tile-title">.icon-box-pink</h3><p class="tile-text">Rosa</p></div></a></div>
+    <div class="col"><a class="tile" href="#"><span class="icon-box icon-box-amber"><i class="bi bi-stars"></i></span><i class="bi bi-arrow-right tile-arrow"></i><div><h3 class="tile-title">.icon-box-amber</h3><p class="tile-text">Âmbar</p></div></a></div>
+    <div class="col"><a class="tile" href="#"><span class="icon-box icon-box-teal"><i class="bi bi-clock"></i></span><i class="bi bi-arrow-right tile-arrow"></i><div><h3 class="tile-title">.icon-box-teal</h3><p class="tile-text">Verde-água</p></div></a></div>
+</div>
+
+<h2 class="section-title">Botões</h2>
+<div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+    <button class="btn btn-glow">.btn-glow</button>
+    <button class="btn btn-primary">.btn-primary</button>
+    <button class="btn btn-outline-primary">.btn-outline-primary</button>
+    <button class="btn btn-secondary">.btn-secondary</button>
+    <button class="btn btn-outline-secondary">.btn-outline-secondary</button>
+    <button class="btn btn-success">.btn-success</button>
+    <button class="btn btn-outline-danger">.btn-outline-danger</button>
+    <button class="btn btn-link">.btn-link</button>
+</div>
+<div class="d-flex flex-wrap gap-2 align-items-center">
+    <button class="btn btn-sm btn-primary">.btn-sm</button>
+    <button class="btn btn-lg btn-primary">.btn-lg</button>
+    <button class="btn btn-icon btn-outline-secondary" aria-label="Exemplo"><i class="bi bi-chevron-left"></i></button>
+    <button class="btn btn-icon btn-primary" aria-label="Exemplo"><i class="bi bi-plus-lg"></i></button>
+    <span class="avatar">M</span>
+    <span class="avatar avatar-lg">M</span>
+</div>
+
+<h2 class="section-title">Badges</h2>
+<div class="d-flex flex-wrap gap-2">
+    <span class="badge badge-soft-primary">badge-soft-primary</span>
+    <span class="badge badge-soft-success">Confirmado</span>
+    <span class="badge badge-soft-warning">Pendente</span>
+    <span class="badge badge-soft-danger">Recusado</span>
+    <span class="badge badge-soft-secondary">Cancelado</span>
+    <span class="badge bg-primary">bg-primary</span>
+</div>
+
+<h2 class="section-title">Alertas</h2>
+<div class="alert alert-success">Agendamento confirmado.</div>
+<div class="alert alert-warning">Esse horário acabou de ser ocupado.</div>
+<div class="alert alert-danger">Não foi possível salvar.</div>
+<div class="alert alert-primary">Dica: toque num serviço para editar.</div>
+
+<h2 class="section-title">Lista</h2>
+<div class="list-group mb-3">
+    <div class="list-group-item py-3 d-flex justify-content-between align-items-center">
+        <div>
+            <div class="fw-semibold">Design de sobrancelhas · <span class="price">R$ 60,00</span></div>
+            <div class="small text-muted">sexta-feira, 24/10 às 14:00</div>
+        </div>
+        <span class="badge badge-soft-success">Confirmado</span>
+    </div>
+    <a href="#" class="list-group-item list-group-item-action py-3">Item clicável (.list-group-item-action)</a>
+</div>
+
+<h2 class="section-title">Cards</h2>
+<div class="row row-cols-1 row-cols-sm-3 g-3">
+    <div class="col"><div class="card h-100"><div class="card-body"><h5 class="card-title">.card</h5><p class="card-text text-muted mb-0">Card padrão.</p></div></div></div>
+    <div class="col"><a href="#" class="card h-100 text-reset"><div class="card-body"><h5 class="card-title">a.card</h5><p class="card-text text-muted mb-0">Card clicável, sobe no hover.</p></div></a></div>
+    <div class="col"><button type="button" class="card card-add h-100 w-100"><div class="card-body w-100 text-center"><i class="bi bi-plus-circle fs-2"></i><div>.card-add</div></div></button></div>
+</div>
+
+<h2 class="section-title">Formulário</h2>
+<div class="card"><div class="card-body">
+    <div class="form-floating mb-3">
+        <input class="form-control" id="exNome" placeholder="Nome" />
+        <label for="exNome">Nome</label>
+    </div>
+    <div class="choice-group mb-3">
+        <div class="choice"><input type="radio" name="exTipo" id="exA" checked /><label for="exA"><i class="bi bi-person-heart"></i>.choice<small>selecionado</small></label></div>
+        <div class="choice"><input type="radio" name="exTipo" id="exB" /><label for="exB"><i class="bi bi-briefcase"></i>.choice<small>normal</small></label></div>
+    </div>
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="exSwitch" checked />
+        <label class="form-check-label" for="exSwitch">Switch</label>
+    </div>
+</div></div>
+
+<h2 class="section-title">Horários (.slot-grid)</h2>
+<div class="slot-grid mb-3">
+    @foreach (var h in new[] { "09:00", "09:30", "10:00", "10:30", "11:00", "14:00", "14:30" })
+    {
+        <a href="#" class="btn btn-outline-primary">@h</a>
+    }
+</div>
+
+<h2 class="section-title">Estado vazio</h2>
+<div class="empty-state">
+    <span class="icon-box"><i class="bi bi-calendar-x"></i></span>
+    <p>Nenhum horário livre nesse dia.</p>
+</div>
+
+<h2 class="section-title">Modal</h2>
+<button type="button" id="abrirModalExemplo" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalExemplo">Abrir modal</button>
+
+<div class="modal fade" id="modalExemplo" tabindex="-1" aria-labelledby="modalExemploTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalExemploTitulo">Novo serviço</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-floating">
+                    <input id="campoModalExemplo" class="form-control" placeholder="Nome" />
+                    <label for="campoModalExemplo">Nome do serviço</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,26 +1,43 @@
 @page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Criar conta";
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="card auth-card">
+    <div class="card-body">
+        <div class="text-center mb-4">
+            <img src="~/icons/icon-192.png" alt="Glowi" class="auth-logo mb-3" />
+            <h1 class="h3 mb-1">Crie sua conta</h1>
+            <p class="text-muted mb-0">Leva menos de um minuto.</p>
+        </div>
 
-<div class="row">
-    <div class="col-md-4">
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
-            <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <select asp-for="Input.Tipo" class="form-select" aria-required="true">
-                    <option value="">Selecione...</option>
-                    <option value="Cliente">Cliente</option>
-                    <option value="Profissional">Profissional</option>
-                </select>
-                <label asp-for="Input.Tipo">Tipo de conta</label>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger small" role="alert"></div>
+
+            <div class="mb-3">
+                <div class="form-label fw-semibold small">Eu sou</div>
+                <div class="choice-group">
+                    <div class="choice">
+                        <input type="radio" asp-for="Input.Tipo" value="Cliente" id="tipoCliente" />
+                        <label for="tipoCliente">
+                            <i class="bi bi-person-heart"></i>
+                            Cliente
+                            <small>Quero agendar serviços</small>
+                        </label>
+                    </div>
+                    <div class="choice">
+                        <input type="radio" asp-for="Input.Tipo" value="Profissional" id="tipoProfissional" />
+                        <label for="tipoProfissional">
+                            <i class="bi bi-briefcase"></i>
+                            Profissional
+                            <small>Quero receber agendamentos</small>
+                        </label>
+                    </div>
+                </div>
                 <span asp-validation-for="Input.Tipo" class="text-danger"></span>
             </div>
+
             <div id="camposProfissional" style="display: none;">
                 <div class="form-floating mb-3">
                     <input asp-for="Input.Especialidade" class="form-control" placeholder="Ex.: Design de sobrancelhas" />
@@ -53,58 +70,34 @@
                 <label asp-for="Input.Password">Senha</label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
-            <div class="form-floating mb-3">
+            <div class="form-floating mb-4">
                 <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="senha" />
                 <label asp-for="Input.ConfirmPassword">Confirmar Senha</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Cadastrar</button>
+            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-glow">Cadastrar</button>
         </form>
+
+        <p class="text-center text-muted mt-4 mb-0">
+            Já tem conta?
+            <a class="fw-semibold" asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Entrar</a>
+        </p>
     </div>
-    @* <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
-            }
-        </section>
-    </div> *@
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        const tipo = document.getElementById('Input_Tipo');
+        const tipos = document.querySelectorAll('input[name="Input.Tipo"]');
         const camposProfissional = document.getElementById('camposProfissional');
 
         function atualizarCampos() {
-            camposProfissional.style.display = tipo.value === 'Profissional' ? '' : 'none';
+            const profissional = document.getElementById('tipoProfissional').checked;
+            camposProfissional.style.display = profissional ? '' : 'none';
         }
 
-        tipo.addEventListener('change', atualizarCampos);
+        tipos.forEach(t => t.addEventListener('change', atualizarCampos));
         atualizarCampos();
     </script>
 }

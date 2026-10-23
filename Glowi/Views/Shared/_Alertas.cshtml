@@ -1,0 +1,17 @@
+@* Mensagens de TempData["Sucesso"] e TempData["Erro"] *@
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success alert-dismissible fade show d-flex gap-2" role="alert">
+        <i class="bi bi-check-circle-fill"></i>
+        <div>@sucesso</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+}
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger alert-dismissible fade show d-flex gap-2" role="alert">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <div>@erro</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+}

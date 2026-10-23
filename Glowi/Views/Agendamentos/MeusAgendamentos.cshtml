@@ -10,34 +10,28 @@
     };
 }
 
-<h1 class="h3 mb-4">Meus agendamentos</h1>
+<div class="page-header d-flex flex-wrap justify-content-between align-items-end gap-2">
+    <div>
+        <h1>Meus agendamentos</h1>
+        <p>Acompanhe seus horários marcados.</p>
+    </div>
+    <a class="btn btn-primary" asp-controller="Profissionais" asp-action="Index"><i class="bi bi-plus-lg"></i> Novo agendamento</a>
+</div>
 
-@if (TempData["Sucesso"] is string sucesso)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @sucesso
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    </div>
-}
-@if (TempData["Erro"] is string erro)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @erro
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    </div>
-}
+<partial name="_Alertas" />
 
 @if (!Model.Proximos.Any())
 {
-    <div class="alert alert-light border mb-4">
-        Você não tem agendamentos marcados.
-        <a asp-controller="Profissionais" asp-action="Index">Ver profissionais</a>
+    <div class="empty-state mb-4">
+        <span class="icon-box"><i class="bi bi-calendar-heart"></i></span>
+        <p>Você não tem agendamentos marcados.</p>
+        <a class="btn btn-sm btn-outline-primary mt-3" asp-controller="Profissionais" asp-action="Index">Ver profissionais</a>
     </div>
 }
 
 @foreach (var secao in secoes.Where(s => s.Itens.Any()))
 {
-    <h2 class="h5 mb-3">@secao.Titulo</h2>
+    <h2 class="section-title">@secao.Titulo</h2>
 
     <div class="list-group mb-4">
         @foreach (var a in secao.Itens)
@@ -48,8 +42,8 @@
             <div class="list-group-item py-3">
                 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
                     <div>
-                        <div class="fw-semibold">@a.Servico?.Nome · @a.Servico?.Preco.ToString("C")</div>
-                        <div>@inicio.ToString("dddd, dd/MM 'às' HH:mm") – @fim.ToString("HH:mm")</div>
+                        <div class="fw-semibold">@a.Servico?.Nome · <span class="price">@a.Servico?.Preco.ToString("C")</span></div>
+                        <div><i class="bi bi-calendar3 text-muted me-1"></i>@inicio.ToString("dddd, dd/MM 'às' HH:mm") – @fim.ToString("HH:mm")</div>
                         <div class="text-muted small">
                             com @a.Profissional?.Usuario?.Nome
                             @if (!string.IsNullOrWhiteSpace(a.Profissional?.Telefone))
@@ -57,7 +51,7 @@
                                 <text>· @a.Profissional.Telefone</text>
                             }
                         </div>
-                        <div class="mt-1"><partial name="_StatusAgendamento" model="a" /></div>
+                        <div class="mt-2"><partial name="_StatusAgendamento" model="a" /></div>
                     </div>
 
                     @if (a.EmAberto)

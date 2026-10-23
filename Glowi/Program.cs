@@ -16,7 +16,8 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => 
 options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddErrorDescriber<Glowi.Services.IdentityErrosPtBr>();
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<Glowi.Services.AgendaService>();

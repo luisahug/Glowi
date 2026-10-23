@@ -18,7 +18,10 @@
 }
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <h1 class="h3 mb-0">Agenda</h1>
+    <div class="page-header mb-0">
+        <h1>Agenda</h1>
+        <p>Seus atendimentos por dia ou semana.</p>
+    </div>
 
     <div class="btn-group" role="group" aria-label="Visão">
         <a class="btn btn-sm @(Model.Semanal ? "btn-outline-primary" : "btn-primary")"
@@ -28,34 +31,21 @@
     </div>
 </div>
 
-@if (TempData["Sucesso"] is string sucesso)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @sucesso
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    </div>
-}
-@if (TempData["Erro"] is string erro)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @erro
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    </div>
-}
+<partial name="_Alertas" />
 
 <form method="get" asp-action="Agenda" class="d-flex flex-wrap align-items-center gap-2 mb-3">
     <input type="hidden" name="visao" value="@visao" />
 
-    <a class="btn btn-outline-secondary" asp-action="Agenda" asp-route-visao="@visao"
+    <a class="btn btn-icon btn-outline-secondary" asp-action="Agenda" asp-route-visao="@visao"
        asp-route-data="@Model.Anterior.ToString("yyyy-MM-dd", inv)"
-       aria-label="@(Model.Semanal ? "Semana anterior" : "Dia anterior")">&larr;</a>
+       aria-label="@(Model.Semanal ? "Semana anterior" : "Dia anterior")"><i class="bi bi-chevron-left"></i></a>
 
     <input type="date" name="data" class="form-control w-auto" aria-label="Escolher data"
            value="@Model.Data.ToString("yyyy-MM-dd", inv)" onchange="this.form.submit()" />
 
-    <a class="btn btn-outline-secondary" asp-action="Agenda" asp-route-visao="@visao"
+    <a class="btn btn-icon btn-outline-secondary" asp-action="Agenda" asp-route-visao="@visao"
        asp-route-data="@Model.Proximo.ToString("yyyy-MM-dd", inv)"
-       aria-label="@(Model.Semanal ? "Próxima semana" : "Próximo dia")">&rarr;</a>
+       aria-label="@(Model.Semanal ? "Próxima semana" : "Próximo dia")"><i class="bi bi-chevron-right"></i></a>
 
     @if (mostraHoje)
     {
@@ -67,7 +57,7 @@
     <div class="fw-semibold text-capitalize">@periodo</div>
     <div class="small text-muted">
         @Model.Total @(Model.Total == 1 ? "agendamento" : "agendamentos")
-        · previsto (confirmados): @Model.FaturamentoPrevisto.ToString("C")
+        · previsto (confirmados): <span class="price">@Model.FaturamentoPrevisto.ToString("C")</span>
     </div>
 </div>
 
@@ -86,7 +76,7 @@
                 <div class="card-body p-2">
                     @if (!dia.Agendamentos.Any())
                     {
-                        <div class="small text-muted">Livre</div>
+                        <div class="small text-muted"><i class="bi bi-sun"></i> Livre</div>
                     }
                     @foreach (var a in dia.Agendamentos)
                     {
@@ -99,7 +89,7 @@
                             <div class="text-truncate text-muted">@a.Servico?.Nome</div>
                             @if (pendente)
                             {
-                                <span class="badge bg-warning text-dark">Pendente</span>
+                                <span class="badge badge-soft-warning">Pendente</span>
                             }
                         </div>
                     }
@@ -114,7 +104,10 @@ else
 
     @if (!dia.Agendamentos.Any())
     {
-        <div class="alert alert-light border">Nenhum agendamento neste dia.</div>
+        <div class="empty-state mb-4">
+            <span class="icon-box"><i class="bi bi-cup-hot"></i></span>
+            <p>Nenhum agendamento neste dia.</p>
+        </div>
     }
 
     <div class="list-group mb-4">
@@ -130,14 +123,14 @@ else
                 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
                     <div class="d-flex gap-3">
                         <div class="text-nowrap">
-                            <div class="fw-semibold fs-5">@inicio.ToString("HH:mm")</div>
+                            <div class="fw-bold fs-5 text-primary">@inicio.ToString("HH:mm")</div>
                             <div class="small text-muted">até @fim.ToString("HH:mm")</div>
                         </div>
                         <div>
                             <div class="fw-semibold">@nomeCliente</div>
                             <div>@a.Servico?.Nome · @a.Servico?.Preco.ToString("C")</div>
                             <div class="text-muted small">@(a.Cliente?.Telefone ?? "Sem telefone cadastrado")</div>
-                            <div class="mt-1"><partial name="_StatusAgendamento" model="a" /></div>
+                            <div class="mt-2"><partial name="_StatusAgendamento" model="a" /></div>
                         </div>
                     </div>
 
@@ -158,7 +151,7 @@ else
                         }
                         @if (linkWhatsApp != null)
                         {
-                            <a class="btn btn-sm btn-outline-secondary" href="@linkWhatsApp" target="_blank" rel="noopener">Mensagem</a>
+                            <a class="btn btn-sm btn-outline-secondary" href="@linkWhatsApp" target="_blank" rel="noopener"><i class="bi bi-whatsapp text-success"></i> Mensagem</a>
                         }
                     </div>
                 </div>
