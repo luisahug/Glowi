@@ -42,6 +42,10 @@ namespace Glowi.Data.Migrations
                     b.Property<DateTime>("Inicio")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<decimal>("Preco")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
                     b.Property<int>("ProfissionalId")
                         .HasColumnType("integer");
 

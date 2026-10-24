@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Glowi.Data;
 using Glowi.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +13,14 @@ public class DeletePersonalDataModel : PageModel
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly ILogger<DeletePersonalDataModel> _logger;
+    private readonly ApplicationDbContext _context;
 
-    public DeletePersonalDataModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<DeletePersonalDataModel> logger)
+    public DeletePersonalDataModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<DeletePersonalDataModel> logger, ApplicationDbContext context)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _logger = logger;
+        _context = context;
     }
 
     [TempData]
@@ -58,16 +61,33 @@ public class DeletePersonalDataModel : PageModel
             return Page();
         }
 
+        // Agendamentos usam DeleteBehavior.Restrict: conta com agendamentos não pode ser apagada
+        var temAgendamentos = await _context.Agendamentos.AnyAsync(a =>
+            a.Cliente!.UsuarioId == user.Id || a.Profissional!.UsuarioId == user.Id);
+        if (temAgendamentos)
+        {
+            StatusMessage = "Erro: sua conta tem agendamentos registrados e não pode ser excluída. Fale com o suporte.";
+            return RedirectToPage("./PersonalData");
+        }
+
+        // tudo numa transação: se a exclusão do usuário falhar, os serviços não são apagados
+        await using var transacao = await _context.Database.BeginTransactionAsync();
         IdentityResult resultado;
         try
         {
+            // a FK Servico -> Profissional não tem cascade, então os serviços saem antes
+            var servicos = await _context.Servico
+                .Where(s => s.Profissional!.UsuarioId == user.Id)
+                .ToListAsync();
+            _context.Servico.RemoveRange(servicos);
+            await _context.SaveChangesAsync();
+
             resultado = await _userManager.DeleteAsync(user);
         }
         catch (DbUpdateException ex)
         {
-            // Agendamentos usam DeleteBehavior.Restrict: conta com agendamentos não pode ser apagada
             _logger.LogWarning(ex, "Não foi possível excluir o usuário {UserId}.", user.Id);
-            StatusMessage = "Erro: sua conta tem agendamentos registrados e não pode ser excluída. Fale com o suporte.";
+            StatusMessage = "Erro: não foi possível excluir sua conta.";
             return RedirectToPage("./PersonalData");
         }
 
@@ -76,6 +96,8 @@ public class DeletePersonalDataModel : PageModel
             StatusMessage = "Erro: não foi possível excluir sua conta.";
             return RedirectToPage("./PersonalData");
         }
+
+        await transacao.CommitAsync();
 
         await _signInManager.SignOutAsync();
         _logger.LogInformation("Usuário {UserId} excluiu a própria conta.", user.Id);

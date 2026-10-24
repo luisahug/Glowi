@@ -18,6 +18,9 @@ public class Agendamento
     public DateTime Inicio { get; set; }
     public DateTime Fim { get; set; }
 
+    // preço do serviço no momento da reserva (não muda se a profissional alterar o serviço depois)
+    public decimal Preco { get; set; }
+
     public StatusAgendamento Status { get; set; } = StatusAgendamento.Pendente;
     public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
 

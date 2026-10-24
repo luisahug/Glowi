@@ -1,0 +1,7 @@
+@model string
+@* Substitui o Manage/_StatusMessage que vem embutido no Identity UI (ele só reconhece "Error", em inglês)
+   e usa o nosso, de Account/, que entende "Erro". *@
+@if (!string.IsNullOrEmpty(Model))
+{
+    <partial name="~/Areas/Identity/Pages/Account/_StatusMessage.cshtml" model="Model" />
+}

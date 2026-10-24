@@ -128,7 +128,7 @@ else
                         </div>
                         <div>
                             <div class="fw-semibold">@nomeCliente</div>
-                            <div>@a.Servico?.Nome · @a.Servico?.Preco.ToString("C")</div>
+                            <div>@a.Servico?.Nome · @a.Preco.ToString("C")</div>
                             <div class="text-muted small">@(a.Cliente?.Telefone ?? "Sem telefone cadastrado")</div>
                             <div class="mt-2"><partial name="_StatusAgendamento" model="a" /></div>
                         </div>

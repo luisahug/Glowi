@@ -16,7 +16,7 @@ public class AgendaViewModel
     public decimal FaturamentoPrevisto => Dias
         .SelectMany(d => d.Agendamentos)
         .Where(a => a.Status == Enum.StatusAgendamento.Confirmado)
-        .Sum(a => a.Servico?.Preco ?? 0);
+        .Sum(a => a.Preco);
 }
 
 public class DiaAgenda

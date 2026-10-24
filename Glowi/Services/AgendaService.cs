@@ -89,6 +89,7 @@ public class AgendaService
             ServicoId = servicoId,
             Inicio = Horario.ParaUtc(inicioBrasilia),
             Fim = Horario.ParaUtc(inicioBrasilia.AddMinutes(servico.DuracaoMinutos)),
+            Preco = servico.Preco,
             Status = StatusAgendamento.Pendente
         };
 
