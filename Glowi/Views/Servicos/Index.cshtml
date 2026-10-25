@@ -1,0 +1,127 @@
+﻿@model IEnumerable<Glowi.Models.Servico>
+@{
+    ViewData["Title"] = "Meus serviços";
+}
+
+<div class="page-header">
+    <h1>Meus serviços</h1>
+    <p>Toque em um serviço para editar.</p>
+</div>
+
+<partial name="_Alertas" />
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+
+    <div class="col">
+        <button type="button" class="card card-add h-100 w-100 p-0 text-center"
+                data-bs-toggle="modal" data-bs-target="#modalServico" data-modo="novo">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center w-100">
+                <i class="bi bi-plus-circle fs-2 mb-1"></i>
+                <span>Novo serviço</span>
+            </div>
+        </button>
+    </div>
+
+    @foreach (var s in Model)
+    {
+        <div class="col">
+            <button type="button" class="card h-100 w-100 p-0 text-start"
+                    data-bs-toggle="modal" data-bs-target="#modalServico"
+                    data-modo="editar"
+                    data-id="@s.ServicoId"
+                    data-nome="@s.Nome"
+                    data-duracao="@s.DuracaoMinutos"
+                    data-preco="@s.Preco.ToString("0.00")">
+                <div class="card-body w-100">
+                    <h5 class="card-title">@s.Nome</h5>
+                    <p class="card-text text-muted mb-1"><i class="bi bi-clock me-1"></i>@s.DuracaoMinutos min</p>
+                    <p class="card-text price mb-0">@s.Preco.ToString("C")</p>
+                </div>
+            </button>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="modalServico" tabindex="-1" aria-labelledby="modalServicoTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formServico" method="post" asp-controller="Servicos" asp-action="Create">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalServicoTitulo">Novo serviço</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="ServicoId" id="campoId" />
+
+                    <div class="form-floating mb-3">
+                        <input name="Nome" id="campoNome" class="form-control" placeholder="Nome" required maxlength="100" />
+                        <label for="campoNome">Nome do serviço</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input name="DuracaoMinutos" id="campoDuracao" type="number" class="form-control"
+                               placeholder="60" required min="5" max="480" step="5" />
+                        <label for="campoDuracao">Duração (minutos)</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input name="Preco" id="campoPreco" class="form-control" placeholder="49,90"
+                               inputmode="decimal" required pattern="^\d+(,\d{1,2})?$"
+                               title="Use vírgula para os centavos. Ex.: 49,90" />
+                        <label for="campoPreco">Preço (R$)</label>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btnExcluir" class="btn btn-outline-danger me-auto d-none">Excluir</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<form id="formExcluir" method="post" class="d-none"></form>
+
+@section Scripts {
+    <script>
+        const modal = document.getElementById('modalServico');
+        const form = document.getElementById('formServico');
+        const titulo = document.getElementById('modalServicoTitulo');
+        const campoId = document.getElementById('campoId');
+        const campoNome = document.getElementById('campoNome');
+        const campoDuracao = document.getElementById('campoDuracao');
+        const campoPreco = document.getElementById('campoPreco');
+        const btnExcluir = document.getElementById('btnExcluir');
+        const formExcluir = document.getElementById('formExcluir');
+
+        modal.addEventListener('show.bs.modal', (evento) => {
+            const card = evento.relatedTarget;
+            const editar = card.dataset.modo === 'editar';
+
+            titulo.textContent = editar ? 'Editar serviço' : 'Novo serviço';
+            form.action = editar
+                ? '@Url.Action("Edit", "Servicos")/' + card.dataset.id
+                : '@Url.Action("Create", "Servicos")';
+
+            campoId.disabled = !editar;
+            campoId.value = editar ? card.dataset.id : '';
+
+            campoNome.value = editar ? card.dataset.nome : '';
+            campoDuracao.value = editar ? card.dataset.duracao : '';
+            campoPreco.value = editar ? card.dataset.preco : '';
+
+            btnExcluir.classList.toggle('d-none', !editar);
+            btnExcluir.dataset.id = editar ? card.dataset.id : '';
+        });
+
+        btnExcluir.addEventListener('click', () => {
+            if (confirm('Excluir este serviço?')) {
+                formExcluir.action = '@Url.Action("Delete", "Servicos")/' + btnExcluir.dataset.id;
+                formExcluir.submit();
+            }
+        });
+    </script>
+}

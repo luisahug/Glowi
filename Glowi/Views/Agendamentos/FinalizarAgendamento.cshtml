@@ -1,0 +1,26 @@
+﻿@model Glowi.Models.ViewModels.Agendamento.ConfirmarAgendamentoViewModel
+@{
+    ViewData["Title"] = "Agendamento enviado";
+    var s = Model.Servico;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card text-center">
+            <div class="card-body py-5 px-4">
+                <span class="icon-box mb-3" style="width: 4.5rem; height: 4.5rem; font-size: 2rem; border-radius: 50%;">
+                    <i class="bi bi-send-check"></i>
+                </span>
+                <h1 class="h3 mb-3">Pedido de agendamento enviado!</h1>
+                <p class="lead fw-semibold mb-1">@s.Nome com @s.Profissional?.Usuario?.Nome</p>
+                <p class="mb-4">@Model.Inicio.ToString("dddd, dd 'de' MMMM 'às' HH:mm")</p>
+                <p class="text-muted mb-4">O horário já está reservado para você. Agora é só aguardar a confirmação da profissional.</p>
+
+                <div class="d-grid d-sm-flex justify-content-center gap-2">
+                    <a asp-action="MeusAgendamentos" class="btn btn-primary">Meus agendamentos</a>
+                    <a asp-controller="Profissionais" asp-action="Index" class="btn btn-outline-primary">Ver profissionais</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

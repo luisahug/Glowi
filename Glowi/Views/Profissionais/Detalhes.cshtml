@@ -1,0 +1,50 @@
+﻿@model Glowi.Models.Profissional
+@{
+    ViewData["Title"] = Model.Usuario?.Nome;
+    var nome = Model.Usuario?.Nome ?? "";
+}
+
+<a asp-action="Index" class="link-back"><i class="bi bi-arrow-left"></i> Voltar</a>
+
+<div class="card bg-soft mb-4">
+    <div class="card-body d-flex gap-3 align-items-center">
+        <span class="avatar avatar-lg">@(nome.Length > 0 ? nome[..1] : "?")</span>
+        <div>
+            <h1 class="h3 mb-1">@nome</h1>
+            @if (!string.IsNullOrWhiteSpace(Model.Especialidade))
+            {
+                <p class="text-muted mb-0">@Model.Especialidade</p>
+            }
+        </div>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.Biografia))
+    {
+        <div class="card-body pt-0">
+            <p class="mb-0">@Model.Biografia</p>
+        </div>
+    }
+</div>
+
+<h2 class="section-title">Serviços</h2>
+
+<div class="list-group">
+    @foreach (var s in Model.Servicos)
+    {
+        <div class="list-group-item d-flex justify-content-between align-items-center gap-3 py-3">
+            <div class="d-flex align-items-center gap-3">
+                <span class="icon-box icon-box-sm"><i class="bi bi-stars"></i></span>
+                <div>
+                    <div class="fw-semibold">@s.Nome</div>
+                    <div class="text-muted small"><i class="bi bi-clock me-1"></i>@s.DuracaoMinutos min</div>
+                </div>
+            </div>
+            <div class="text-end">
+                <div class="price mb-1">@s.Preco.ToString("C")</div>
+                @if (User.IsInRole("Cliente"))
+                {
+                    <a class="btn btn-sm btn-primary" asp-controller="Agendamentos" asp-action="CriarNovoAgendamento" asp-route-servicoId="@s.ServicoId">Agendar</a>
+                }
+            </div>
+        </div>
+    }
+</div>

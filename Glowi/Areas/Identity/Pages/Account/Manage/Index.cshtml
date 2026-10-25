@@ -1,0 +1,55 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Perfil";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<h2 class="h4 mb-1">Perfil</h2>
+<p class="text-muted mb-4">
+    @(Model.EhProfissional
+        ? "Essas informações aparecem para as clientes na sua página."
+        : "Seus dados de contato para as profissionais.")
+</p>
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<form id="profile-form" method="post">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger small" role="alert"></div>
+
+    <div class="form-floating mb-3">
+        <input value="@Model.Email" class="form-control" id="email-atual" placeholder="Email" disabled />
+        <label for="email-atual">Email</label>
+        <div class="form-text">Para alterar, use a aba <a asp-page="./Email">Email</a>.</div>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="Input.Nome" class="form-control" autocomplete="name" placeholder="Seu nome" />
+        <label asp-for="Input.Nome"></label>
+        <span asp-validation-for="Input.Nome" class="text-danger"></span>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="Input.Telefone" class="form-control" autocomplete="tel" placeholder="(11) 99999-9999" />
+        <label asp-for="Input.Telefone"></label>
+        <span asp-validation-for="Input.Telefone" class="text-danger"></span>
+    </div>
+
+    @if (Model.EhProfissional)
+    {
+        <div class="form-floating mb-3">
+            <input asp-for="Input.Especialidade" class="form-control" placeholder="Ex.: Design de sobrancelhas" />
+            <label asp-for="Input.Especialidade"></label>
+            <span asp-validation-for="Input.Especialidade" class="text-danger"></span>
+        </div>
+        <div class="form-floating mb-3">
+            <textarea asp-for="Input.Biografia" class="form-control" placeholder="Conte sobre você" style="height: 120px"></textarea>
+            <label asp-for="Input.Biografia"></label>
+            <span asp-validation-for="Input.Biografia" class="text-danger"></span>
+        </div>
+    }
+
+    <button id="update-profile-button" type="submit" class="btn btn-primary">Salvar</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

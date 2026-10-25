@@ -1,0 +1,56 @@
+﻿@{
+    var naHome = ViewContext.RouteData.Values["controller"]?.ToString() == "Home"
+                 && ViewContext.RouteData.Values["action"]?.ToString() == "Index"
+                 && ViewContext.RouteData.Values["area"] == null;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>@ViewData["Title"] - Glowi</title>
+    <link rel="manifest" href="~/manifest.webmanifest" />
+    <meta name="theme-color" content="#6d28d9" />
+    <link rel="icon" type="image/png" sizes="192x192" href="~/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="~/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Glowi" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <script type="importmap"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/glowi.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Glowi.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="app-bar">
+        <div class="container app-bar-inner">
+            @if (!naHome)
+            {
+                <a class="btn btn-icon btn-outline-secondary border-0" asp-area="" asp-controller="Home" asp-action="Index" aria-label="Voltar ao início" title="Início">
+                    <i class="bi bi-house"></i>
+                </a>
+            }
+            <a class="app-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <img src="~/icons/icon-192.png" alt="" />
+                <span>Glowi</span>
+            </a>
+            <partial name="_LoginPartial" />
+        </div>
+    </header>
+
+    <main role="main" class="container app-main">
+        @RenderBody()
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

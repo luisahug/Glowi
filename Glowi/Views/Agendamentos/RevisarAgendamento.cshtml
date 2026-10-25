@@ -1,0 +1,39 @@
+﻿@model Glowi.Models.ViewModels.Agendamento.ConfirmarAgendamentoViewModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Confirmar agendamento";
+    var inv = CultureInfo.InvariantCulture;
+    var s = Model.Servico;
+    var fim = Model.Inicio.AddMinutes(s.DuracaoMinutos);
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-5">
+        <div class="page-header">
+            <h1>Confirmar agendamento</h1>
+            <p>Confira os detalhes antes de enviar o pedido.</p>
+        </div>
+
+        <div class="card mb-4">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex gap-3 align-items-center py-3"><span class="icon-box icon-box-sm"><i class="bi bi-stars"></i></span><div><div class="small text-muted">Serviço</div><strong>@s.Nome</strong></div></li>
+                <li class="list-group-item d-flex gap-3 align-items-center py-3"><span class="icon-box icon-box-sm icon-box-pink"><i class="bi bi-person"></i></span><div><div class="small text-muted">Profissional</div>@s.Profissional?.Usuario?.Nome</div></li>
+                <li class="list-group-item d-flex gap-3 align-items-center py-3"><span class="icon-box icon-box-sm icon-box-blue"><i class="bi bi-calendar3"></i></span><div><div class="small text-muted">Data</div><span>@Model.Inicio.ToString("dddd, dd 'de' MMMM")</span></div></li>
+                <li class="list-group-item d-flex gap-3 align-items-center py-3"><span class="icon-box icon-box-sm icon-box-teal"><i class="bi bi-clock"></i></span><div><div class="small text-muted">Horário</div>@Model.Inicio.ToString("HH:mm") às @fim.ToString("HH:mm")</div></li>
+                <li class="list-group-item d-flex gap-3 align-items-center py-3"><span class="icon-box icon-box-sm icon-box-amber"><i class="bi bi-cash-coin"></i></span><div><div class="small text-muted">Valor</div><span class="price">@s.Preco.ToString("C")</span></div></li>
+            </ul>
+        </div>
+
+        <form method="post" asp-action="ConfirmarAgendamento">
+            <input type="hidden" name="servicoId" value="@s.ServicoId" />
+            <input type="hidden" name="inicio" value="@Model.Inicio.ToString("yyyy-MM-ddTHH:mm", inv)" />
+
+            <button type="submit" class="btn btn-glow btn-lg w-100 mb-2">Confirmar</button>
+            <a class="btn btn-link w-100"
+               asp-action="CriarNovoAgendamento" asp-route-servicoId="@s.ServicoId"
+               asp-route-data="@DateOnly.FromDateTime(Model.Inicio).ToString("yyyy-MM-dd", inv)">
+                Escolher outro horário
+            </a>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,11 @@
+﻿@model string
+
+@if (!String.IsNullOrEmpty(Model))
+{
+    var erro = Model.StartsWith("Erro") || Model.StartsWith("Error");
+    <div class="alert alert-@(erro ? "danger" : "success") alert-dismissible fade show d-flex gap-2" role="alert">
+        <i class="bi @(erro ? "bi-exclamation-circle-fill" : "bi-check-circle-fill")"></i>
+        <div>@Model</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+}

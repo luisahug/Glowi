@@ -1,0 +1,77 @@
+@model Glowi.Models.ViewModels.Agendamento.MeusAgendamentosViewModel
+@using Glowi.Models.Enum
+@using Glowi.Services
+@{
+    ViewData["Title"] = "Meus agendamentos";
+
+    var secoes = new[]
+    {
+        (Titulo: "Aguardando sua confirmação", Itens: Model.Pendentes),
+        (Titulo: "Próximos", Itens: Model.Proximos),
+        (Titulo: "Histórico", Itens: Model.Historico)
+    };
+}
+
+<div class="page-header">
+    <h1>Agendamentos</h1>
+    <p>Confirme pedidos, reagende e fale com suas clientes.</p>
+</div>
+
+<partial name="_Alertas" />
+
+@if (!Model.Pendentes.Any() && !Model.Proximos.Any())
+{
+    <div class="empty-state mb-4">
+        <span class="icon-box"><i class="bi bi-calendar-heart"></i></span>
+        <p>Nenhum agendamento marcado por enquanto.</p>
+    </div>
+}
+
+@foreach (var secao in secoes.Where(s => s.Itens.Any()))
+{
+    <h2 class="section-title">@secao.Titulo</h2>
+
+    <div class="list-group mb-4">
+        @foreach (var a in secao.Itens)
+        {
+            var inicio = Horario.ParaBrasilia(a.Inicio);
+            var fim = Horario.ParaBrasilia(a.Fim);
+            var nomeCliente = a.Cliente?.Usuario?.Nome;
+            var linkWhatsApp = WhatsApp.Link(a.Cliente?.Telefone,
+                $"Olá, {nomeCliente}! Aqui é do Glowi, sobre seu agendamento de {a.Servico?.Nome} em {inicio:dd/MM 'às' HH:mm}.");
+
+            <div class="list-group-item py-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                    <div>
+                        <div class="fw-semibold">@nomeCliente</div>
+                        <div class="text-muted small">@(a.Cliente?.Telefone ?? "Sem telefone cadastrado")</div>
+                        <div>@a.Servico?.Nome · <span class="price">@a.Preco.ToString("C")</span></div>
+                        <div><i class="bi bi-calendar3 text-muted me-1"></i>@inicio.ToString("dddd, dd/MM 'às' HH:mm") – @fim.ToString("HH:mm")</div>
+                        <div class="mt-2"><partial name="_StatusAgendamento" model="a" /></div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (a.Status == StatusAgendamento.Pendente && a.EmAberto)
+                        {
+                            <form method="post" asp-action="Confirmar" asp-route-id="@a.AgendamentoId">
+                                <button type="submit" class="btn btn-sm btn-success">Confirmar</button>
+                            </form>
+                            <form method="post" asp-action="Recusar" asp-route-id="@a.AgendamentoId"
+                                  onsubmit="return confirm('Recusar este pedido?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Recusar</button>
+                            </form>
+                        }
+                        @if (a.EmAberto)
+                        {
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Reagendar" asp-route-id="@a.AgendamentoId">Reagendar</a>
+                        }
+                        @if (linkWhatsApp != null)
+                        {
+                            <a class="btn btn-sm btn-outline-secondary" href="@linkWhatsApp" target="_blank" rel="noopener"><i class="bi bi-whatsapp text-success"></i> Mensagem</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

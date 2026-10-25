@@ -1,0 +1,33 @@
+/* Estilos específicos de páginas. Componentes reutilizáveis ficam em glowi.css. */
+
+/* Agenda da profissional */
+.agenda-semana {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .75rem;
+}
+
+@media (min-width: 992px) {
+  .agenda-semana {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+
+.agenda-semana .card-header {
+  border-bottom: 0;
+  font-weight: 600;
+  font-size: .9rem;
+}
+
+.agenda-item {
+  border-left: 4px solid transparent;
+  padding-left: .6rem;
+}
+
+.agenda-item-confirmado {
+  border-left-color: var(--bs-success);
+}
+
+.agenda-item-pendente {
+  border-left-color: var(--bs-warning);
+}

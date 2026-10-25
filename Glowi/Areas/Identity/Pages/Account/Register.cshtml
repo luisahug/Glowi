@@ -1,0 +1,103 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Criar conta";
+}
+
+<div class="card auth-card">
+    <div class="card-body">
+        <div class="text-center mb-4">
+            <img src="~/icons/icon-192.png" alt="Glowi" class="auth-logo mb-3" />
+            <h1 class="h3 mb-1">Crie sua conta</h1>
+            <p class="text-muted mb-0">Leva menos de um minuto.</p>
+        </div>
+
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger small" role="alert"></div>
+
+            <div class="mb-3">
+                <div class="form-label fw-semibold small">Eu sou</div>
+                <div class="choice-group">
+                    <div class="choice">
+                        <input type="radio" asp-for="Input.Tipo" value="Cliente" id="tipoCliente" />
+                        <label for="tipoCliente">
+                            <i class="bi bi-person-heart"></i>
+                            Cliente
+                            <small>Quero agendar serviços</small>
+                        </label>
+                    </div>
+                    <div class="choice">
+                        <input type="radio" asp-for="Input.Tipo" value="Profissional" id="tipoProfissional" />
+                        <label for="tipoProfissional">
+                            <i class="bi bi-briefcase"></i>
+                            Profissional
+                            <small>Quero receber agendamentos</small>
+                        </label>
+                    </div>
+                </div>
+                <span asp-validation-for="Input.Tipo" class="text-danger"></span>
+            </div>
+
+            <div id="camposProfissional" style="display: none;">
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Especialidade" class="form-control" placeholder="Ex.: Design de sobrancelhas" />
+                    <label asp-for="Input.Especialidade">Especialidade</label>
+                    <span asp-validation-for="Input.Especialidade" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <textarea asp-for="Input.Biografia" class="form-control" placeholder="Conte sobre você" style="height: 100px"></textarea>
+                    <label asp-for="Input.Biografia">Sobre você</label>
+                    <span asp-validation-for="Input.Biografia" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Nome" class="form-control" autocomplete="name" aria-required="true" placeholder="Seu nome" />
+                <label asp-for="Input.Nome">Nome</label>
+                <span asp-validation-for="Input.Nome" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@exemplo.com" />
+                <label asp-for="Input.Email">Email</label>
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Telefone" class="form-control" autocomplete="tel" placeholder="(11) 99999-9999" />
+                <label asp-for="Input.Telefone">Telefone</label>
+                <span asp-validation-for="Input.Telefone" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="senha" />
+                <label asp-for="Input.Password">Senha</label>
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-4">
+                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="senha" />
+                <label asp-for="Input.ConfirmPassword">Confirmar Senha</label>
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
+            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-glow">Cadastrar</button>
+        </form>
+
+        <p class="text-center text-muted mt-4 mb-0">
+            Já tem conta?
+            <a class="fw-semibold" asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Entrar</a>
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        const tipos = document.querySelectorAll('input[name="Input.Tipo"]');
+        const camposProfissional = document.getElementById('camposProfissional');
+
+        function atualizarCampos() {
+            const profissional = document.getElementById('tipoProfissional').checked;
+            camposProfissional.style.display = profissional ? '' : 'none';
+        }
+
+        tipos.forEach(t => t.addEventListener('change', atualizarCampos));
+        atualizarCampos();
+    </script>
+}

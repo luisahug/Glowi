@@ -1,0 +1,39 @@
+using Glowi.Models;
+using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+
+namespace Glowi.Controllers
+{
+    public class HomeController : Controller
+    {
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        // Vitrine dos componentes do glowi.css (só em desenvolvimento)
+        public IActionResult Estilos([FromServices] IWebHostEnvironment env)
+        {
+            if (!env.IsDevelopment()) return NotFound();
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        [Route("Home/Status/{codigo}")]
+        public IActionResult Status(int codigo)
+        {
+            ViewData["Codigo"] = codigo;
+            return View();
+        }
+    }
+}

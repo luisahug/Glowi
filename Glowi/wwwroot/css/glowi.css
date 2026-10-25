@@ -1,0 +1,939 @@
+/* ==========================================================================
+   Glowi UI — biblioteca de estilo sobre o Bootstrap 5.3
+   Cor base: #6d28d9 (roxo do logo)
+
+   Índice
+   1. Tokens (cores, raios, sombras, fonte)
+   2. Base
+   3. App bar (cabeçalho)
+   4. Títulos de página
+   5. Botões
+   6. Cards e tiles (atalhos da tela inicial)
+   7. Hero
+   8. List group
+   9. Formulários
+   10. Badges, alerts, modal, dropdown
+   11. Utilitários (avatar, ícones, estado vazio, chips de horário)
+   ========================================================================== */
+
+/* 1. Tokens ---------------------------------------------------------------- */
+:root,
+[data-bs-theme=light] {
+    --glowi-50: #f5f3ff;
+    --glowi-100: #ede9fe;
+    --glowi-200: #ddd6fe;
+    --glowi-300: #c4b5fd;
+    --glowi-400: #a78bfa;
+    --glowi-500: #8b5cf6;
+    --glowi-600: #7c3aed;
+    --glowi-700: #6d28d9;
+    --glowi-800: #5b21b6;
+    --glowi-900: #4c1d95;
+    --glowi-pink: #db2777;
+
+    --glowi-gradient: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 55%, #c026d3 100%);
+    --glowi-gradient-soft: linear-gradient(135deg, #f5f3ff 0%, #fdf4ff 100%);
+
+    --glowi-bg: #f7f5fc;
+    --glowi-surface: #ffffff;
+    --glowi-text: #1e1b2e;
+    --glowi-muted: #6b6880;
+    --glowi-border: #ebe7f5;
+
+    --glowi-radius-sm: .625rem;
+    --glowi-radius: .875rem;
+    --glowi-radius-lg: 1.25rem;
+    --glowi-radius-xl: 1.75rem;
+
+    --glowi-shadow-sm: 0 1px 2px rgba(30, 27, 46, .04), 0 1px 3px rgba(76, 29, 149, .06);
+    --glowi-shadow: 0 4px 6px -2px rgba(30, 27, 46, .04), 0 10px 24px -6px rgba(76, 29, 149, .12);
+    --glowi-shadow-lg: 0 20px 40px -12px rgba(76, 29, 149, .28);
+
+    --glowi-transition: .18s cubic-bezier(.4, 0, .2, 1);
+
+    /* Bootstrap */
+    --bs-primary: #6d28d9;
+    --bs-primary-rgb: 109, 40, 217;
+    --bs-primary-text-emphasis: #4c1d95;
+    --bs-primary-bg-subtle: #ede9fe;
+    --bs-primary-border-subtle: #c4b5fd;
+    --bs-success: #059669;
+    --bs-success-rgb: 5, 150, 105;
+    --bs-danger: #e11d48;
+    --bs-danger-rgb: 225, 29, 72;
+    --bs-warning: #f59e0b;
+    --bs-warning-rgb: 245, 158, 11;
+
+    --bs-body-font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --bs-body-color: var(--glowi-text);
+    --bs-body-color-rgb: 30, 27, 46;
+    --bs-body-bg: var(--glowi-bg);
+    --bs-secondary-color: var(--glowi-muted);
+    --bs-emphasis-color: var(--glowi-text);
+    --bs-border-color: var(--glowi-border);
+    --bs-border-radius: var(--glowi-radius-sm);
+    --bs-border-radius-sm: .5rem;
+    --bs-border-radius-lg: var(--glowi-radius);
+    --bs-border-radius-xl: var(--glowi-radius-lg);
+    --bs-link-color: #6d28d9;
+    --bs-link-color-rgb: 109, 40, 217;
+    --bs-link-hover-color: #5b21b6;
+    --bs-link-hover-color-rgb: 91, 33, 182;
+    --bs-focus-ring-color: rgba(109, 40, 217, .25);
+}
+
+/* 2. Base ------------------------------------------------------------------ */
+html {
+    font-size: 15px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+body {
+    min-height: 100vh;
+    background: var(--glowi-bg);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-weight: 700;
+    letter-spacing: -.02em;
+}
+
+a {
+    text-decoration: none;
+}
+
+::selection {
+    background: var(--glowi-200);
+}
+
+.text-muted {
+    color: var(--glowi-muted) !important;
+}
+
+.app-main {
+    padding-top: 1.25rem;
+    padding-bottom: calc(2.5rem + env(safe-area-inset-bottom));
+}
+
+/* 3. App bar --------------------------------------------------------------- */
+.app-bar {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    padding-top: env(safe-area-inset-top);
+    background: rgba(255, 255, 255, .82);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--glowi-border);
+}
+
+.app-bar-inner {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: 3.75rem;
+}
+
+.app-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    margin-right: auto;
+    color: var(--glowi-text);
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: -.03em;
+}
+
+    .app-brand:hover {
+        color: var(--glowi-700);
+    }
+
+    .app-brand img {
+        width: 2.1rem;
+        height: 2.1rem;
+        border-radius: .65rem;
+        box-shadow: 0 4px 12px -4px rgba(109, 40, 217, .6);
+    }
+
+/* 4. Títulos de página ----------------------------------------------------- */
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+    .page-header h1 {
+        font-size: 1.6rem;
+        margin-bottom: .25rem;
+    }
+
+    .page-header p {
+        color: var(--glowi-muted);
+        margin-bottom: 0;
+    }
+
+.section-title {
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--glowi-muted);
+    margin: 1.75rem 0 .75rem;
+}
+
+.link-back {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    font-size: .95rem;
+    color: var(--glowi-muted);
+}
+
+    .link-back:hover {
+        color: var(--glowi-700);
+    }
+
+/* 5. Botões ---------------------------------------------------------------- */
+.btn {
+    --bs-btn-font-weight: 600;
+    --bs-btn-padding-x: 1.1rem;
+    --bs-btn-padding-y: .55rem;
+    --bs-btn-border-radius: var(--glowi-radius-sm);
+    --bs-btn-focus-box-shadow: 0 0 0 .25rem rgba(109, 40, 217, .25);
+    transition: color var(--glowi-transition), background-color var(--glowi-transition), border-color var(--glowi-transition), box-shadow var(--glowi-transition), transform var(--glowi-transition);
+}
+
+    .btn:active {
+        transform: scale(.97);
+    }
+
+.btn-sm {
+    --bs-btn-padding-x: .8rem;
+    --bs-btn-padding-y: .35rem;
+    --bs-btn-font-size: .85rem;
+    --bs-btn-border-radius: .55rem;
+}
+
+.btn-lg {
+    --bs-btn-padding-x: 1.5rem;
+    --bs-btn-padding-y: .8rem;
+    --bs-btn-font-size: 1.05rem;
+    --bs-btn-border-radius: var(--glowi-radius);
+}
+
+.btn-primary {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #6d28d9;
+    --bs-btn-border-color: #6d28d9;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #5b21b6;
+    --bs-btn-hover-border-color: #5b21b6;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #4c1d95;
+    --bs-btn-active-border-color: #4c1d95;
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: #a78bfa;
+    --bs-btn-disabled-border-color: #a78bfa;
+    box-shadow: 0 6px 16px -6px rgba(109, 40, 217, .55);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: #6d28d9;
+    --bs-btn-border-color: #c4b5fd;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #6d28d9;
+    --bs-btn-hover-border-color: #6d28d9;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #5b21b6;
+    --bs-btn-active-border-color: #5b21b6;
+    --bs-btn-disabled-color: #a78bfa;
+    --bs-btn-disabled-border-color: #ddd6fe;
+    background-color: var(--glowi-surface);
+}
+
+.btn-secondary {
+    --bs-btn-color: var(--glowi-800);
+    --bs-btn-bg: var(--glowi-100);
+    --bs-btn-border-color: var(--glowi-100);
+    --bs-btn-hover-color: var(--glowi-900);
+    --bs-btn-hover-bg: var(--glowi-200);
+    --bs-btn-hover-border-color: var(--glowi-200);
+    --bs-btn-active-color: var(--glowi-900);
+    --bs-btn-active-bg: var(--glowi-300);
+    --bs-btn-active-border-color: var(--glowi-300);
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: var(--glowi-text);
+    --bs-btn-border-color: var(--glowi-border);
+    --bs-btn-hover-color: var(--glowi-700);
+    --bs-btn-hover-bg: var(--glowi-50);
+    --bs-btn-hover-border-color: var(--glowi-200);
+    --bs-btn-active-color: var(--glowi-800);
+    --bs-btn-active-bg: var(--glowi-100);
+    --bs-btn-active-border-color: var(--glowi-300);
+    --bs-btn-disabled-color: #b8b5c6;
+    --bs-btn-disabled-border-color: var(--glowi-border);
+    background-color: var(--glowi-surface);
+}
+
+.btn-success {
+    --bs-btn-bg: #059669;
+    --bs-btn-border-color: #059669;
+    --bs-btn-hover-bg: #047857;
+    --bs-btn-hover-border-color: #047857;
+    --bs-btn-active-bg: #065f46;
+    --bs-btn-active-border-color: #065f46;
+}
+
+.btn-outline-danger {
+    --bs-btn-color: #e11d48;
+    --bs-btn-border-color: #fecdd3;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #e11d48;
+    --bs-btn-hover-border-color: #e11d48;
+    --bs-btn-active-bg: #be123c;
+    --bs-btn-active-border-color: #be123c;
+    background-color: var(--glowi-surface);
+}
+
+.btn-link {
+    --bs-btn-color: #6d28d9;
+    --bs-btn-hover-color: #5b21b6;
+    --bs-btn-active-color: #4c1d95;
+    text-decoration: none;
+}
+
+/* Botão com gradiente para ações de destaque */
+.btn-glow {
+    --bs-btn-color: #fff;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-active-color: #fff;
+    --bs-btn-border-color: transparent;
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-active-border-color: transparent;
+    background: var(--glowi-gradient);
+    box-shadow: 0 10px 24px -10px rgba(109, 40, 217, .8);
+}
+
+    .btn-glow:hover {
+        filter: brightness(1.08);
+    }
+
+/* Botão redondo só com ícone */
+.btn-icon {
+    --bs-btn-padding-x: 0;
+    --bs-btn-padding-y: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    font-size: 1.15rem;
+}
+
+.btn-close:focus {
+    box-shadow: 0 0 0 .25rem rgba(109, 40, 217, .25);
+}
+
+/* 6. Cards e tiles --------------------------------------------------------- */
+.card {
+    --bs-card-border-color: var(--glowi-border);
+    --bs-card-border-radius: var(--glowi-radius-lg);
+    --bs-card-inner-border-radius: calc(var(--glowi-radius-lg) - 1px);
+    --bs-card-spacer-x: 1.25rem;
+    --bs-card-spacer-y: 1.15rem;
+    --bs-card-cap-bg: var(--glowi-50);
+    --bs-card-bg: var(--glowi-surface);
+    box-shadow: var(--glowi-shadow-sm);
+}
+
+a.card, button.card {
+    transition: transform var(--glowi-transition), box-shadow var(--glowi-transition), border-color var(--glowi-transition);
+}
+
+    a.card:hover, button.card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--glowi-shadow);
+        border-color: var(--glowi-200);
+    }
+
+/* Card tracejado para "adicionar novo" */
+.card-add {
+    border: 2px dashed var(--glowi-300) !important;
+    background: var(--glowi-50) !important;
+    color: var(--glowi-700) !important;
+    box-shadow: none;
+    font-weight: 600;
+}
+
+    .card-add:hover {
+        background: var(--glowi-100) !important;
+    }
+
+/* Tile: atalho da tela inicial */
+.tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+    height: 100%;
+    padding: 1.15rem;
+    background: var(--glowi-surface);
+    border: 1px solid var(--glowi-border);
+    border-radius: var(--glowi-radius-lg);
+    box-shadow: var(--glowi-shadow-sm);
+    color: var(--glowi-text);
+    overflow: hidden;
+    transition: transform var(--glowi-transition), box-shadow var(--glowi-transition), border-color var(--glowi-transition);
+}
+
+    .tile:hover {
+        color: var(--glowi-text);
+        transform: translateY(-3px);
+        box-shadow: var(--glowi-shadow);
+        border-color: var(--glowi-200);
+    }
+
+    .tile:active {
+        transform: scale(.98);
+    }
+
+    .tile::after {
+        content: "";
+        position: absolute;
+        right: -2.5rem;
+        bottom: -2.5rem;
+        width: 6rem;
+        height: 6rem;
+        border-radius: 50%;
+        background: var(--glowi-50);
+        transition: transform .3s ease;
+        z-index: 0;
+    }
+
+    .tile:hover::after {
+        transform: scale(1.35);
+    }
+
+    .tile > * {
+        position: relative;
+        z-index: 1;
+    }
+
+.tile-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.25;
+    margin: 0;
+}
+
+.tile-text {
+    color: var(--glowi-muted);
+    font-size: .85rem;
+    line-height: 1.4;
+    margin: .2rem 0 0;
+}
+
+.tile-arrow {
+    position: absolute;
+    top: 1.15rem;
+    right: 1.15rem;
+    color: var(--glowi-300);
+    font-size: 1.1rem;
+    transition: transform var(--glowi-transition), color var(--glowi-transition);
+}
+
+.tile:hover .tile-arrow {
+    color: var(--glowi-700);
+    transform: translateX(3px);
+}
+
+/* 7. Hero ------------------------------------------------------------------ */
+.hero {
+    position: relative;
+    overflow: hidden;
+    padding: 1.75rem 1.5rem;
+    border-radius: var(--glowi-radius-xl);
+    background: var(--glowi-gradient);
+    color: #fff;
+    box-shadow: var(--glowi-shadow-lg);
+}
+
+    .hero::before,
+    .hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, .12);
+    }
+
+    .hero::before {
+        width: 14rem;
+        height: 14rem;
+        top: -6rem;
+        right: -4rem;
+    }
+
+    .hero::after {
+        width: 8rem;
+        height: 8rem;
+        bottom: -4rem;
+        right: 6rem;
+        background: rgba(255, 255, 255, .08);
+    }
+
+    .hero > * {
+        position: relative;
+        z-index: 1;
+    }
+
+.hero-eyebrow {
+    font-size: .8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    opacity: .8;
+    margin-bottom: .35rem;
+}
+
+.hero-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -.03em;
+    margin-bottom: .35rem;
+}
+
+.hero-text {
+    opacity: .9;
+    margin-bottom: 0;
+    max-width: 32rem;
+}
+
+@media (min-width: 768px) {
+    .hero {
+        padding: 2.5rem 2.25rem;
+    }
+
+    .hero-title {
+        font-size: 2.25rem;
+    }
+}
+
+/* Destaque de funcionalidade (tela inicial deslogada) */
+.feature {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+/* 8. List group ------------------------------------------------------------ */
+.list-group {
+    --bs-list-group-border-color: var(--glowi-border);
+    --bs-list-group-border-radius: var(--glowi-radius-lg);
+    --bs-list-group-item-padding-x: 1.25rem;
+    --bs-list-group-action-hover-bg: var(--glowi-50);
+    --bs-list-group-active-bg: #6d28d9;
+    --bs-list-group-active-border-color: #6d28d9;
+    box-shadow: var(--glowi-shadow-sm);
+}
+
+.list-group-flush {
+    box-shadow: none;
+}
+
+/* 9. Formulários ----------------------------------------------------------- */
+.form-control,
+.form-select {
+    border-color: var(--glowi-border);
+    border-radius: var(--glowi-radius-sm);
+    background-color: var(--glowi-surface);
+}
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--glowi-400);
+        box-shadow: 0 0 0 .25rem rgba(109, 40, 217, .15);
+    }
+
+.form-floating > label {
+    color: var(--glowi-muted);
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-select ~ label {
+    color: var(--glowi-700);
+}
+
+.form-check-input:checked {
+    background-color: #6d28d9;
+    border-color: #6d28d9;
+}
+
+.form-check-input:focus {
+    border-color: var(--glowi-400);
+    box-shadow: 0 0 0 .25rem rgba(109, 40, 217, .15);
+}
+
+.form-switch .form-check-input:focus {
+    --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23a78bfa'/%3e%3c/svg%3e");
+}
+
+.form-switch .form-check-input:checked {
+    --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+
+.field-validation-error,
+.validation-summary-errors {
+    font-size: .85rem;
+}
+
+.validation-summary-valid.alert {
+    display: none;
+}
+
+.validation-summary-errors ul {
+    margin: 0;
+    padding-left: 1rem;
+}
+
+/* Card de autenticação (login / cadastro) */
+.auth-card {
+    max-width: 440px;
+    margin: 1rem auto 2rem;
+}
+
+    .auth-card .card-body {
+        padding: 2rem 1.5rem;
+    }
+
+@media (min-width: 576px) {
+    .auth-card .card-body {
+        padding: 2.5rem 2.25rem;
+    }
+}
+
+.auth-logo {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 1.15rem;
+    box-shadow: 0 12px 24px -10px rgba(109, 40, 217, .7);
+}
+
+/* Seletor de opções em formato de card (ex.: tipo de conta) */
+.choice-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+}
+
+.choice input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.choice label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .35rem;
+    height: 100%;
+    padding: 1rem .75rem;
+    border: 2px solid var(--glowi-border);
+    border-radius: var(--glowi-radius);
+    background: var(--glowi-surface);
+    text-align: center;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color var(--glowi-transition), background-color var(--glowi-transition);
+}
+
+    .choice label i {
+        font-size: 1.5rem;
+        color: var(--glowi-400);
+    }
+
+    .choice label small {
+        font-weight: 400;
+        color: var(--glowi-muted);
+        font-size: .78rem;
+    }
+
+.choice input:checked + label {
+    border-color: #6d28d9;
+    background: var(--glowi-50);
+}
+
+    .choice input:checked + label i {
+        color: #6d28d9;
+    }
+
+.choice input:focus-visible + label {
+    box-shadow: 0 0 0 .25rem rgba(109, 40, 217, .25);
+}
+
+/* 10. Badges, alerts, modal, dropdown -------------------------------------- */
+.badge {
+    --bs-badge-font-weight: 600;
+    --bs-badge-padding-x: .65em;
+    --bs-badge-padding-y: .4em;
+    --bs-badge-border-radius: 2rem;
+    letter-spacing: .01em;
+}
+
+/* Badges suaves: badge-soft-{cor} */
+.badge-soft-primary { background: var(--glowi-100); color: var(--glowi-800); }
+.badge-soft-success { background: #d1fae5; color: #065f46; }
+.badge-soft-warning { background: #fef3c7; color: #92400e; }
+.badge-soft-danger { background: #ffe4e6; color: #9f1239; }
+.badge-soft-secondary { background: #f1f0f5; color: #57546a; }
+
+.alert {
+    --bs-alert-border-radius: var(--glowi-radius);
+    --bs-alert-padding-x: 1.1rem;
+    --bs-alert-padding-y: .9rem;
+    border-width: 0;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.alert-success { --bs-alert-bg: #ecfdf5; --bs-alert-color: #065f46; --bs-alert-border-color: #10b981; }
+.alert-danger { --bs-alert-bg: #fff1f2; --bs-alert-color: #9f1239; --bs-alert-border-color: #f43f5e; }
+.alert-warning { --bs-alert-bg: #fffbeb; --bs-alert-color: #92400e; --bs-alert-border-color: #f59e0b; }
+.alert-info,
+.alert-primary { --bs-alert-bg: var(--glowi-50); --bs-alert-color: var(--glowi-900); --bs-alert-border-color: var(--glowi-500); }
+
+.modal {
+    --bs-modal-border-radius: var(--glowi-radius-xl);
+    --bs-modal-inner-border-radius: calc(var(--glowi-radius-xl) - 1px);
+    --bs-modal-border-width: 0;
+    --bs-modal-header-border-width: 0;
+    --bs-modal-footer-border-width: 0;
+    --bs-modal-padding: 1.5rem; /* valor único: o Bootstrap usa em calc() no rodapé */
+    --bs-modal-header-padding: 1.25rem 1.5rem .25rem;
+    --bs-modal-box-shadow: var(--glowi-shadow-lg);
+}
+
+.modal-title {
+    font-weight: 700;
+}
+
+.modal-backdrop {
+    --bs-backdrop-bg: #1e1036;
+    --bs-backdrop-opacity: .45;
+}
+
+.btn-danger {
+    --bs-btn-bg: #e11d48;
+    --bs-btn-border-color: #e11d48;
+    --bs-btn-hover-bg: #be123c;
+    --bs-btn-hover-border-color: #be123c;
+    --bs-btn-active-bg: #9f1239;
+    --bs-btn-active-border-color: #9f1239;
+}
+
+/* Menu de abas (ex.: Minha conta): horizontal com rolagem no celular, vertical no desktop */
+.nav-pills {
+    --bs-nav-pills-border-radius: var(--glowi-radius-sm);
+    --bs-nav-pills-link-active-bg: #6d28d9;
+    --bs-nav-link-color: var(--glowi-text);
+    --bs-nav-link-hover-color: var(--glowi-700);
+    --bs-nav-link-font-weight: 600;
+}
+
+.account-nav {
+    flex-wrap: nowrap;
+    gap: .35rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+    .account-nav .nav-link {
+        display: flex;
+        align-items: center;
+        gap: .55rem;
+        white-space: nowrap;
+    }
+
+        .account-nav .nav-link:not(.active):hover {
+            background: var(--glowi-100);
+        }
+
+@media (min-width: 992px) {
+    .account-nav {
+        flex-direction: column;
+        overflow: visible;
+    }
+}
+
+.dropdown-menu {
+    --bs-dropdown-border-color: var(--glowi-border);
+    --bs-dropdown-border-radius: var(--glowi-radius);
+    --bs-dropdown-box-shadow: var(--glowi-shadow);
+    --bs-dropdown-link-hover-bg: var(--glowi-50);
+    --bs-dropdown-link-active-bg: #6d28d9;
+    --bs-dropdown-item-padding-y: .55rem;
+    --bs-dropdown-padding-x: .35rem;
+    box-shadow: var(--bs-dropdown-box-shadow);
+}
+
+.dropdown-item {
+    border-radius: .5rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+/* 11. Utilitários ---------------------------------------------------------- */
+
+/* Ícone dentro de um quadrado arredondado colorido */
+.icon-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--glowi-radius);
+    background: var(--glowi-100);
+    color: var(--glowi-700);
+    font-size: 1.35rem;
+}
+
+.icon-box-sm {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: .65rem;
+    font-size: 1.05rem;
+}
+
+.icon-box-pink { background: #fce7f3; color: #be185d; }
+.icon-box-amber { background: #fef3c7; color: #b45309; }
+.icon-box-teal { background: #ccfbf1; color: #0f766e; }
+.icon-box-blue { background: #e0e7ff; color: #4338ca; }
+
+/* Avatar com iniciais */
+.avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    background: var(--glowi-gradient);
+    color: #fff;
+    font-weight: 700;
+    font-size: .95rem;
+    text-transform: uppercase;
+}
+
+.avatar-lg {
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: 1.3rem;
+}
+
+button.avatar {
+    border: 0;
+    padding: 0;
+    box-shadow: 0 0 0 3px var(--glowi-100);
+    transition: box-shadow var(--glowi-transition);
+}
+
+    button.avatar:hover,
+    button.avatar:focus-visible {
+        box-shadow: 0 0 0 3px var(--glowi-300);
+        outline: 0;
+    }
+
+/* Estado vazio */
+.empty-state {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    background: var(--glowi-surface);
+    border: 1px dashed var(--glowi-200);
+    border-radius: var(--glowi-radius-lg);
+    color: var(--glowi-muted);
+}
+
+    .empty-state .icon-box {
+        margin-bottom: .85rem;
+    }
+
+    .empty-state p {
+        margin-bottom: 0;
+    }
+
+/* Chips de horário (seleção de horário livre) */
+.slot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.25rem, 1fr));
+    gap: .6rem;
+}
+
+    .slot-grid .btn,
+    .slot-grid form,
+    .slot-grid form .btn {
+        width: 100%;
+    }
+
+/* Preço em destaque */
+.price {
+    font-weight: 700;
+    color: var(--glowi-700);
+}
+
+.text-gradient {
+    background: var(--glowi-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.min-w-0 {
+    min-width: 0;
+}
+
+.bg-soft {
+    background: var(--glowi-gradient-soft) !important;
+}
+
+.fade-up {
+    /* Não aplicar em elementos que contenham modais: durante a animação o transform
+       prende os filhos position: fixed e o modal fica atrás do backdrop.
+       "backwards" garante que nada fica aplicado depois que termina. */
+    animation: glowi-fade-up .45s cubic-bezier(.2, .8, .2, 1) backwards;
+}
+
+@keyframes glowi-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fade-up {
+        animation: none;
+    }
+
+    .tile, .btn, a.card, button.card {
+        transition: none;
+    }
+}

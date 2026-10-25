@@ -1,0 +1,119 @@
+﻿@model IEnumerable<Glowi.Models.Disponibilidade>
+@using System.Globalization
+@{
+    ViewData["Title"] = "Meus horários";
+
+    var cultura = new CultureInfo("pt-BR");
+
+    var dias = new[] {
+        DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday,
+        DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday
+    };
+    string NomeDia(DayOfWeek d) => cultura.TextInfo.ToTitleCase(cultura.DateTimeFormat.GetDayName(d));
+}
+
+<div class="page-header">
+    <h1>Meus horários</h1>
+    <p>Defina em quais horários você atende em cada dia da semana. As clientes só conseguem agendar dentro desses horários.</p>
+</div>
+
+<partial name="_Alertas" />
+
+<div class="list-group">
+    @foreach (var dia in dias)
+    {
+        var doDia = Model.Where(h => h.DiaSemana == dia).ToList();
+
+        <div class="list-group-item py-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="fw-semibold" style="min-width: 140px;">@NomeDia(dia)</div>
+
+                <div class="d-flex flex-wrap gap-2 flex-grow-1">
+                    @if (!doDia.Any())
+                    {
+                        <span class="badge badge-soft-secondary">Não atende</span>
+                    }
+                    @foreach (var h in doDia)
+                    {
+                        <button type="button" class="btn btn-sm btn-secondary btn-remover"
+                                data-id="@h.DisponibilidadeId"
+                                data-texto="@NomeDia(dia), @h.HoraInicio.ToString("HH:mm") às @h.HoraFim.ToString("HH:mm")"
+                                title="Clique para remover">
+                            @h.HoraInicio.ToString("HH:mm") – @h.HoraFim.ToString("HH:mm") <i class="bi bi-x-lg ms-1"></i>
+                        </button>
+                    }
+                </div>
+
+                <button type="button" class="btn btn-sm btn-outline-primary"
+                        data-bs-toggle="modal" data-bs-target="#modalHorario" data-dia="@((int)dia)">
+                    <i class="bi bi-plus-lg"></i> Adicionar
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="modalHorario" tabindex="-1" aria-labelledby="modalHorarioTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" asp-controller="Disponibilidades" asp-action="Create">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalHorarioTitulo">Adicionar horário</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <select name="DiaSemana" id="campoDia" class="form-select" required>
+                            @foreach (var dia in dias)
+                            {
+                                <option value="@((int)dia)">@NomeDia(dia)</option>
+                            }
+                        </select>
+                        <label for="campoDia">Dia da semana</label>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col">
+                            <div class="form-floating">
+                                <input name="HoraInicio" id="campoInicio" type="time" class="form-control" required step="900" value="09:00" />
+                                <label for="campoInicio">Início</label>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-floating">
+                                <input name="HoraFim" id="campoFim" type="time" class="form-control" required step="900" value="18:00" />
+                                <label for="campoFim">Fim</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<form id="formRemover" method="post" class="d-none"></form>
+
+@section Scripts {
+    <script>
+        document.getElementById('modalHorario').addEventListener('show.bs.modal', (evento) => {
+            document.getElementById('campoDia').value = evento.relatedTarget.dataset.dia;
+        });
+
+        const formRemover = document.getElementById('formRemover');
+        document.querySelectorAll('.btn-remover').forEach(botao => {
+            botao.addEventListener('click', () => {
+                if (confirm(`Remover o horário de ${botao.dataset.texto}?`)) {
+                    formRemover.action = '@Url.Action("Delete", "Disponibilidades")/' + botao.dataset.id;
+                    formRemover.submit();
+                }
+            });
+        });
+    </script>
+}
