@@ -1,0 +1,54 @@
+@using Glowi.Services
+@model (List<ItemMenu> Itens, ItemMenu? Ativo, int Pendentes)
+@{
+    // href montado aqui: o <a> não aceita asp-controller/asp-action e asp-page juntos, mesmo com um deles nulo
+    string? Href(ItemMenu item) => item.Page != null
+        ? Url.Page(item.Page, new { area = item.Area })
+        : Url.Action(item.Action, item.Controller, new { area = "" });
+
+    string? Contador(ItemMenu item) =>
+        item.Pendentes && Model.Pendentes > 0 ? (Model.Pendentes > 9 ? "9+" : Model.Pendentes.ToString()) : null;
+}
+
+<nav class="app-sidebar d-none d-lg-flex" aria-label="Menu principal">
+    <a class="app-brand" asp-area="" asp-controller="Home" asp-action="Index">
+        <img src="~/icons/icon-192.png" alt="" />
+        <span>Glowi</span>
+    </a>
+
+    <ul class="app-sidebar-nav">
+        @foreach (var item in Model.Itens)
+        {
+            var ativo = item == Model.Ativo;
+            var contador = Contador(item);
+            <li>
+                <a class="app-sidebar-link @(ativo ? "active" : "")" aria-current="@(ativo ? "page" : null)" href="@Href(item)">
+                    <i class="bi @item.Icone"></i>
+                    <span>@item.Titulo</span>
+                    @if (contador != null)
+                    {
+                        <span class="badge rounded-pill bg-danger ms-auto" aria-label="@Model.Pendentes pendentes">@contador</span>
+                    }
+                </a>
+            </li>
+        }
+    </ul>
+</nav>
+
+<nav class="app-tabbar d-lg-none" aria-label="Menu principal">
+    @foreach (var item in Model.Itens.Where(i => !i.SoNoDesktop))
+    {
+        var ativo = item == Model.Ativo;
+        var contador = Contador(item);
+        <a class="app-tab @(ativo ? "active" : "")" aria-current="@(ativo ? "page" : null)" href="@Href(item)">
+            <span class="app-tab-icon">
+                <i class="bi @item.Icone"></i>
+                @if (contador != null)
+                {
+                    <span class="app-tab-badge" aria-label="@Model.Pendentes pendentes">@contador</span>
+                }
+            </span>
+            <span class="app-tab-label">@item.Rotulo</span>
+        </a>
+    }
+</nav>

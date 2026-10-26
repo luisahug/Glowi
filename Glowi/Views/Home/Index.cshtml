@@ -3,19 +3,7 @@
 @{
     ViewData["Title"] = "Início";
 
-    var atalhos = new List<(string Controller, string Action, string Icone, string Cor, string Titulo, string Texto)>();
-    if (User.IsInRole("Profissional"))
-    {
-        atalhos.Add(("Atendimentos", "Agenda", "bi-calendar-week", "", "Agenda", "Sua semana e seu dia de atendimentos"));
-        atalhos.Add(("Atendimentos", "Index", "bi-bell", "icon-box-pink", "Agendamentos", "Confirme, recuse ou reagende pedidos"));
-        atalhos.Add(("Servicos", "Index", "bi-stars", "icon-box-amber", "Meus serviços", "Cadastre preços e duração"));
-        atalhos.Add(("Disponibilidades", "Index", "bi-clock", "icon-box-teal", "Meus horários", "Defina quando você atende"));
-    }
-    if (User.IsInRole("Cliente"))
-    {
-        atalhos.Add(("Profissionais", "Index", "bi-search-heart", "", "Agendar", "Encontre profissionais e serviços"));
-        atalhos.Add(("Agendamentos", "MeusAgendamentos", "bi-calendar-check", "icon-box-pink", "Meus agendamentos", "Acompanhe seus horários marcados"));
-    }
+    var atalhos = Glowi.Services.Menu.Atalhos(User);
 
     var hora = Glowi.Services.Horario.Agora.Hour;
     var saudacao = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";

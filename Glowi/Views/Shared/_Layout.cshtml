@@ -1,7 +1,5 @@
 ﻿@{
-    var naHome = ViewContext.RouteData.Values["controller"]?.ToString() == "Home"
-                 && ViewContext.RouteData.Values["action"]?.ToString() == "Index"
-                 && ViewContext.RouteData.Values["area"] == null;
+    var logado = User.Identity?.IsAuthenticated == true;
 }
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -27,16 +25,15 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Glowi.styles.css" asp-append-version="true" />
 </head>
-<body>
+<body class="@(logado ? "com-nav" : "")">
+    @if (logado)
+    {
+        @await Component.InvokeAsync("Navegacao")
+    }
+
     <header class="app-bar">
         <div class="container app-bar-inner">
-            @if (!naHome)
-            {
-                <a class="btn btn-icon btn-outline-secondary border-0" asp-area="" asp-controller="Home" asp-action="Index" aria-label="Voltar ao início" title="Início">
-                    <i class="bi bi-house"></i>
-                </a>
-            }
-            <a class="app-brand" asp-area="" asp-controller="Home" asp-action="Index">
+            <a class="app-brand @(logado ? "d-lg-none" : "")" asp-area="" asp-controller="Home" asp-action="Index">
                 <img src="~/icons/icon-192.png" alt="" />
                 <span>Glowi</span>
             </a>
