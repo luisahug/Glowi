@@ -8,6 +8,16 @@
         (Titulo: "Próximos", Itens: Model.Proximos),
         (Titulo: "Histórico", Itens: Model.Historico)
     };
+
+    var modalCancelar = new Glowi.Models.ViewModels.ModalConfirmacaoViewModel
+    {
+        Id = "modalCancelar",
+        Titulo = "Cancelar agendamento?",
+        Texto = "O horário será liberado para outras clientes. Essa ação não pode ser desfeita.",
+        Icone = "bi-calendar-x",
+        Manter = "Manter",
+        Confirmar = "Sim, cancelar"
+    };
 }
 
 <div class="page-header d-flex flex-wrap justify-content-between align-items-end gap-2">
@@ -56,13 +66,19 @@
 
                     @if (a.EmAberto)
                     {
-                        <form method="post" asp-action="Cancelar" asp-route-id="@a.AgendamentoId"
-                              onsubmit="return confirm('Cancelar este agendamento?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar</button>
-                        </form>
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                data-bs-toggle="modal" data-bs-target="#modalCancelar"
+                                data-acao="@Url.Action("Cancelar", new { id = a.AgendamentoId })"
+                                data-resumo="@a.Servico?.Nome"
+                                data-quando="@inicio.ToString("dddd, dd/MM 'às' HH:mm")"
+                                data-pessoa="com @a.Profissional?.Usuario?.Nome">
+                            Cancelar
+                        </button>
                     }
                 </div>
             </div>
         }
     </div>
 }
+
+<partial name="_ModalConfirmacao" model="modalCancelar" />

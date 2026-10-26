@@ -10,11 +10,20 @@
         (Titulo: "Próximos", Itens: Model.Proximos),
         (Titulo: "Histórico", Itens: Model.Historico)
     };
+
+    var modalRecusar = new Glowi.Models.ViewModels.ModalConfirmacaoViewModel
+    {
+        Id = "modalRecusar",
+        Titulo = "Recusar pedido?",
+        Texto = "O horário volta a ficar livre na sua agenda. Essa ação não pode ser desfeita.",
+        Icone = "bi-calendar-x",
+        Confirmar = "Sim, recusar"
+    };
 }
 
 <div class="page-header">
     <h1>Agendamentos</h1>
-    <p>Confirme pedidos, reagende e fale com suas clientes.</p>
+    <p>Confirme ou recuse pedidos e fale com suas clientes.</p>
 </div>
 
 <partial name="_Alertas" />
@@ -56,14 +65,14 @@
                             <form method="post" asp-action="Confirmar" asp-route-id="@a.AgendamentoId">
                                 <button type="submit" class="btn btn-sm btn-success">Confirmar</button>
                             </form>
-                            <form method="post" asp-action="Recusar" asp-route-id="@a.AgendamentoId"
-                                  onsubmit="return confirm('Recusar este pedido?');">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Recusar</button>
-                            </form>
-                        }
-                        @if (a.EmAberto)
-                        {
-                            <a class="btn btn-sm btn-outline-primary" asp-action="Reagendar" asp-route-id="@a.AgendamentoId">Reagendar</a>
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="modal" data-bs-target="#modalRecusar"
+                                    data-acao="@Url.Action("Recusar", new { id = a.AgendamentoId })"
+                                    data-resumo="@a.Servico?.Nome"
+                                    data-quando="@inicio.ToString("dddd, dd/MM 'às' HH:mm")"
+                                    data-pessoa="Cliente: @nomeCliente">
+                                Recusar
+                            </button>
                         }
                         @if (linkWhatsApp != null)
                         {
@@ -75,3 +84,5 @@
         }
     </div>
 }
+
+<partial name="_ModalConfirmacao" model="modalRecusar" />

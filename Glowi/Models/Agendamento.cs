@@ -27,7 +27,7 @@ public class Agendamento
     // não é coluna no banco: concluído = confirmado e o horário já passou
     public bool Concluido => Status == StatusAgendamento.Confirmado && Fim <= DateTime.UtcNow;
 
-    // pendente ou confirmado e ainda não começou: pode cancelar ou reagendar
+    // pendente ou confirmado e ainda não começou: pode cancelar
     public bool EmAberto =>
         (Status == StatusAgendamento.Pendente || Status == StatusAgendamento.Confirmado) && Inicio > DateTime.UtcNow;
 }

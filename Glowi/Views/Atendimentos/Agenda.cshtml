@@ -140,14 +140,14 @@ else
                             <form method="post" asp-action="Confirmar" asp-route-id="@a.AgendamentoId" asp-route-returnUrl="@urlAtual">
                                 <button type="submit" class="btn btn-sm btn-success">Confirmar</button>
                             </form>
-                            <form method="post" asp-action="Recusar" asp-route-id="@a.AgendamentoId" asp-route-returnUrl="@urlAtual"
-                                  onsubmit="return confirm('Recusar este pedido?');">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Recusar</button>
-                            </form>
-                        }
-                        @if (a.EmAberto)
-                        {
-                            <a class="btn btn-sm btn-outline-primary" asp-action="Reagendar" asp-route-id="@a.AgendamentoId">Reagendar</a>
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="modal" data-bs-target="#modalRecusar"
+                                    data-acao="@Url.Action("Recusar", new { id = a.AgendamentoId, returnUrl = urlAtual })"
+                                    data-resumo="@a.Servico?.Nome"
+                                    data-quando="@Horario.ParaBrasilia(a.Inicio).ToString("dddd, dd/MM 'às' HH:mm")"
+                                    data-pessoa="Cliente: @a.Cliente?.Usuario?.Nome">
+                                Recusar
+                            </button>
                         }
                         @if (linkWhatsApp != null)
                         {
@@ -159,3 +159,5 @@ else
         }
     </div>
 }
+
+<partial name="_ModalConfirmacao" model='new Glowi.Models.ViewModels.ModalConfirmacaoViewModel { Id = "modalRecusar", Titulo = "Recusar pedido?", Texto = "O horário volta a ficar livre na sua agenda. Essa ação não pode ser desfeita.", Icone = "bi-calendar-x", Confirmar = "Sim, recusar" }' />

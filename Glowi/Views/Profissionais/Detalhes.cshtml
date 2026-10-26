@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = Model.Usuario?.Nome;
     var nome = Model.Usuario?.Nome ?? "";
+    // dia escolhido no filtro de agenda da busca: o agendamento já abre nele
+    var data = Context.Request.Query["data"].ToString();
 }
 
 <a asp-action="Index" class="link-back"><i class="bi bi-arrow-left"></i> Voltar</a>
@@ -42,7 +44,7 @@
                 <div class="price mb-1">@s.Preco.ToString("C")</div>
                 @if (User.IsInRole("Cliente"))
                 {
-                    <a class="btn btn-sm btn-primary" asp-controller="Agendamentos" asp-action="CriarNovoAgendamento" asp-route-servicoId="@s.ServicoId">Agendar</a>
+                    <a class="btn btn-sm btn-primary" asp-controller="Agendamentos" asp-action="CriarNovoAgendamento" asp-route-servicoId="@s.ServicoId" asp-route-data="@(string.IsNullOrEmpty(data) ? null : data)">Agendar</a>
                 }
             </div>
         </div>

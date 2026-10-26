@@ -14,8 +14,7 @@ public class AgendaService
         _context = context;
     }
 
-    // ignorarAgendamentoId: usado no reagendamento, para o próprio agendamento não bloquear os horários vizinhos
-    public async Task<List<DateTime>> ObterHorariosLivres(int servicoId, DateOnly data, int? ignorarAgendamentoId = null)
+    public async Task<List<DateTime>> ObterHorariosLivres(int servicoId, DateOnly data)
     {
         var servico = await _context.Servico
             .Include(s => s.Profissional)
@@ -25,9 +24,6 @@ public class AgendaService
             return new List<DateTime>();
 
         var prof = servico.Profissional;
-        var duracao = TimeSpan.FromMinutes(servico.DuracaoMinutos);
-        var intervalo = TimeSpan.FromMinutes(prof.IntervaloMinutos);
-        var limiteMinimo = Horario.Agora.AddHours(prof.AntecedenciaMinimaHoras);
 
         var disponibilidade = await _context.Disponibilidades
             .Where(d => d.ProfissionalId == prof.ProfissionalId && d.DiaSemana == data.DayOfWeek)
@@ -39,7 +35,6 @@ public class AgendaService
 
         var ocupados = (await _context.Agendamentos
                 .Where(a => a.ProfissionalId == prof.ProfissionalId
-                         && (ignorarAgendamentoId == null || a.AgendamentoId != ignorarAgendamentoId)
                          && a.Status != StatusAgendamento.Cancelado
                          && a.Status != StatusAgendamento.Recusado
                          && a.Inicio < fimDia
@@ -48,6 +43,56 @@ public class AgendaService
                 .ToListAsync())
             .Select(a => (Inicio: Horario.ParaBrasilia(a.Inicio), Fim: Horario.ParaBrasilia(a.Fim)))
             .ToList();
+
+        return CalcularLivres(servico, prof, data, disponibilidade, ocupados);
+    }
+
+    // versão em lote (busca do cliente): horários livres de vários serviços no mesmo dia, com 2 consultas no total.
+    // de/ate filtram pelo horário de início (ate exclusivo). Os serviços precisam vir com Profissional carregado.
+    public async Task<Dictionary<int, List<DateTime>>> ObterHorariosLivres(
+        IEnumerable<Servico> servicos, DateOnly data, TimeOnly? de = null, TimeOnly? ate = null)
+    {
+        var lista = servicos.Where(s => s.Profissional != null).DistinctBy(s => s.ServicoId).ToList();
+        var profIds = lista.Select(s => s.Profissional!.ProfissionalId).Distinct().ToList();
+
+        var disponibilidades = (await _context.Disponibilidades
+                .Where(d => profIds.Contains(d.ProfissionalId) && d.DiaSemana == data.DayOfWeek)
+                .OrderBy(d => d.HoraInicio)
+                .ToListAsync())
+            .ToLookup(d => d.ProfissionalId);
+
+        var inicioDia = Horario.ParaUtc(data.ToDateTime(TimeOnly.MinValue));
+        var fimDia = Horario.ParaUtc(data.AddDays(1).ToDateTime(TimeOnly.MinValue));
+
+        var ocupados = (await _context.Agendamentos
+                .Where(a => profIds.Contains(a.ProfissionalId)
+                         && a.Status != StatusAgendamento.Cancelado
+                         && a.Status != StatusAgendamento.Recusado
+                         && a.Inicio < fimDia
+                         && a.Fim > inicioDia)
+                .Select(a => new { a.ProfissionalId, a.Inicio, a.Fim })
+                .ToListAsync())
+            .ToLookup(a => a.ProfissionalId, a => (Inicio: Horario.ParaBrasilia(a.Inicio), Fim: Horario.ParaBrasilia(a.Fim)));
+
+        return lista.ToDictionary(
+            s => s.ServicoId,
+            s =>
+            {
+                var profId = s.Profissional!.ProfissionalId;
+                return CalcularLivres(s, s.Profissional, data, disponibilidades[profId], ocupados[profId].ToList())
+                    .Where(t => (de == null || TimeOnly.FromDateTime(t) >= de) &&
+                                (ate == null || TimeOnly.FromDateTime(t) < ate))
+                    .ToList();
+            });
+    }
+
+    private static List<DateTime> CalcularLivres(
+        Servico servico, Profissional prof, DateOnly data,
+        IEnumerable<Disponibilidade> disponibilidade, List<(DateTime Inicio, DateTime Fim)> ocupados)
+    {
+        var duracao = TimeSpan.FromMinutes(servico.DuracaoMinutos);
+        var intervalo = TimeSpan.FromMinutes(prof.IntervaloMinutos);
+        var limiteMinimo = Horario.Agora.AddHours(prof.AntecedenciaMinimaHoras);
 
         var livres = new List<DateTime>();
 
@@ -103,31 +148,6 @@ public class AgendaService
         catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException { SqlState: "23P01" })
         {
             _context.Entry(agendamento).State = EntityState.Detached;
-            return "Esse horário acabou de ser reservado. Escolha outro.";
-        }
-    }
-
-    // a profissional escolhe o novo horário, então o agendamento já fica confirmado
-    public async Task<string?> Reagendar(Agendamento agendamento, DateTime novoInicioBrasilia)
-    {
-        var livres = await ObterHorariosLivres(agendamento.ServicoId, DateOnly.FromDateTime(novoInicioBrasilia), agendamento.AgendamentoId);
-        if (!livres.Contains(novoInicioBrasilia))
-            return "Esse horário não está disponível. Escolha outro.";
-
-        var servico = await _context.Servico.FirstAsync(s => s.ServicoId == agendamento.ServicoId);
-
-        agendamento.Inicio = Horario.ParaUtc(novoInicioBrasilia);
-        agendamento.Fim = Horario.ParaUtc(novoInicioBrasilia.AddMinutes(servico.DuracaoMinutos));
-        agendamento.Status = StatusAgendamento.Confirmado;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-            return null;
-        }
-        catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException { SqlState: "23P01" })
-        {
-            await _context.Entry(agendamento).ReloadAsync();
             return "Esse horário acabou de ser reservado. Escolha outro.";
         }
     }

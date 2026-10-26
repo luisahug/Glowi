@@ -1,43 +1,237 @@
-﻿@model IEnumerable<Glowi.Models.Profissional>
+﻿@model Glowi.Models.ViewModels.Profissionais.BuscaViewModel
+@using Microsoft.AspNetCore.Http
 @{
-    ViewData["Title"] = "Profissionais";
+    ViewData["Title"] = "Agendar";
+    var ver = Model.VerServicos ? "servicos" : null;
+    var filtros = Model.FiltrosAtivos;
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    var dataRota = Model.Data?.ToString("yyyy-MM-dd", inv);
+    bool Destaca(string texto) => Model.Busca != null && texto.Contains(Model.Busca, StringComparison.OrdinalIgnoreCase);
+
+    // URL atual trocando (ou removendo, se valor = null) um parâmetro; mantém os demais filtros
+    string UrlCom(string chave, string? valor)
+    {
+        var query = Context.Request.Query
+            .Where(kv => kv.Key != chave && !string.IsNullOrEmpty(kv.Value))
+            .Select(kv => KeyValuePair.Create(kv.Key, (string?)kv.Value.ToString()))
+            .ToList();
+        if (valor != null) query.Add(KeyValuePair.Create(chave, (string?)valor));
+        return Context.Request.Path + QueryString.Create(query);
+    }
 }
 
-<div class="page-header">
-    <h1>Profissionais</h1>
-    <p>Escolha uma profissional para ver os serviços e agendar.</p>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div class="page-header mb-0">
+        <h1>Agendar</h1>
+        <p>Busque por profissional, serviço ou tipo de profissional.</p>
+    </div>
+
+    <div class="btn-group" role="group" aria-label="Ver resultados por">
+        <a class="btn btn-sm @(Model.VerServicos ? "btn-outline-primary" : "btn-primary")" href="@UrlCom("ver", null)">Profissionais</a>
+        <a class="btn btn-sm @(Model.VerServicos ? "btn-primary" : "btn-outline-primary")" href="@UrlCom("ver", "servicos")">Serviços</a>
+    </div>
 </div>
 
-@if (!Model.Any())
+<form method="get" asp-action="Index" role="search">
+    @if (ver != null)
+    {
+        <input type="hidden" name="ver" value="@ver" />
+    }
+
+    <div class="d-flex gap-2 mb-3">
+        <div class="input-group">
+            <input type="search" name="busca" class="form-control" value="@Model.Busca" aria-label="Buscar"
+                   placeholder="@(Model.VerServicos ? "Ex.: manicure, design de sobrancelha..." : "Nome, serviço ou especialidade")" />
+            <button type="submit" class="btn btn-primary" aria-label="Buscar"><i class="bi bi-search"></i></button>
+        </div>
+        <button type="button" class="btn btn-outline-primary text-nowrap" data-bs-toggle="offcanvas" data-bs-target="#painelFiltros" aria-controls="painelFiltros">
+            <i class="bi bi-sliders"></i><span class="d-none d-sm-inline ms-1">Filtros</span>
+            @if (filtros.Any())
+            {
+                <span class="badge bg-primary ms-1">@filtros.Count</span>
+            }
+        </button>
+    </div>
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="painelFiltros" aria-labelledby="painelFiltrosTitulo">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title" id="painelFiltrosTitulo"><i class="bi bi-sliders me-2"></i>Filtros</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+        </div>
+
+        <div class="offcanvas-body">
+            @* cada filtro é uma .filtro-secao; novos filtros (ex.: faixa de valor) entram aqui *@
+            <section class="filtro-secao">
+                <label class="filtro-titulo" for="filtroTipo">Tipo de profissional</label>
+                <select class="form-select" name="tipo" id="filtroTipo" disabled="@(!Model.Tipos.Any())">
+                    <option value="">Todos</option>
+                    @foreach (var t in Model.Tipos)
+                    {
+                        <option value="@t" selected="@string.Equals(t, Model.Tipo, StringComparison.OrdinalIgnoreCase)">@t</option>
+                    }
+                </select>
+            </section>
+
+            <section class="filtro-secao">
+                <label class="filtro-titulo" for="filtroData">Horário livre</label>
+                <div class="d-flex gap-2 mb-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-dia="@Model.Hoje.ToString("yyyy-MM-dd", inv)">Hoje</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-dia="@Model.Hoje.AddDays(1).ToString("yyyy-MM-dd", inv)">Amanhã</button>
+                </div>
+                <input type="date" class="form-control mb-2" name="data" id="filtroData" aria-label="Dia"
+                       min="@Model.Hoje.ToString("yyyy-MM-dd", inv)" max="@Model.Maximo.ToString("yyyy-MM-dd", inv)"
+                       value="@Model.Data?.ToString("yyyy-MM-dd", inv)" />
+                <select class="form-select" name="turno" id="filtroTurno" aria-label="Turno" disabled="@(Model.Data == null)">
+                    <option value="">Qualquer horário</option>
+                    @foreach (var t in Glowi.Models.ViewModels.Profissionais.BuscaViewModel.Turnos)
+                    {
+                        <option value="@t.Chave" selected="@(t.Chave == Model.Turno)">@t.Nome</option>
+                    }
+                </select>
+                <p class="small text-muted mt-2 mb-0">Mostra só quem tem horário livre no dia escolhido.</p>
+            </section>
+        </div>
+
+        <div class="offcanvas-footer">
+            <a class="btn btn-outline-secondary" asp-action="Index" asp-route-busca="@Model.Busca" asp-route-ver="@ver">Limpar</a>
+            <button type="submit" class="btn btn-primary flex-grow-1">Ver resultados</button>
+        </div>
+    </div>
+</form>
+
+@if (filtros.Any())
 {
-    <div class="empty-state">
-        <span class="icon-box"><i class="bi bi-person-heart"></i></span>
-        <p>Nenhuma profissional disponível no momento.</p>
+    <div class="chips mb-3" aria-label="Filtros aplicados">
+        @foreach (var f in filtros)
+        {
+            <a class="chip active" href="@UrlCom(f.Chave, null)" aria-label="Remover filtro @f.Rotulo">
+                @f.Rotulo <i class="bi bi-x-lg ms-1"></i>
+            </a>
+        }
     </div>
 }
 
-<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
-    @foreach (var p in Model)
-    {
-        var nome = p.Usuario?.Nome ?? "";
-        <div class="col">
-            <a asp-action="Detalhes" asp-route-id="@p.ProfissionalId" class="card h-100 text-reset">
-                <div class="card-body d-flex gap-3">
-                    <span class="avatar avatar-lg">@(nome.Length > 0 ? nome[..1] : "?")</span>
-                    <div class="flex-grow-1 min-w-0">
-                        <h5 class="card-title mb-1">@nome</h5>
-                        @if (!string.IsNullOrWhiteSpace(p.Especialidade))
-                        {
-                            <p class="card-text text-muted small mb-2">@p.Especialidade</p>
-                        }
-                        <div class="d-flex flex-wrap gap-2 align-items-center small">
-                            <span class="badge badge-soft-primary">@p.Servicos.Count @(p.Servicos.Count == 1 ? "serviço" : "serviços")</span>
-                            <span class="text-muted">a partir de <span class="price">@p.Servicos.Min(s => s.Preco).ToString("C")</span></span>
+@if (Model.TemFiltro)
+{
+    <div class="d-flex justify-content-between align-items-baseline gap-2 mb-3 small text-muted">
+        <span>
+            @Model.Total @(Model.VerServicos
+                ? (Model.Total == 1 ? "serviço encontrado" : "serviços encontrados")
+                : (Model.Total == 1 ? "profissional encontrada" : "profissionais encontradas"))
+        </span>
+        <a class="btn btn-link btn-sm p-0" asp-action="Index" asp-route-ver="@ver">Limpar tudo</a>
+    </div>
+}
+
+@if (Model.Total == 0)
+{
+    <div class="empty-state">
+        <span class="icon-box"><i class="bi @(Model.TemFiltro ? "bi-search" : "bi-person-heart")"></i></span>
+        <p>
+            @(Model.TemFiltro
+                ? "Nada encontrado com esses filtros. Tente outra palavra ou ajuste os filtros."
+                : "Nenhuma profissional disponível no momento.")
+        </p>
+    </div>
+}
+else if (Model.VerServicos)
+{
+    <div class="list-group">
+        @foreach (var s in Model.Servicos)
+        {
+            var p = s.Profissional!;
+            <div class="list-group-item d-flex justify-content-between align-items-center gap-3 py-3">
+                <div class="d-flex align-items-center gap-3 min-w-0">
+                    <span class="icon-box icon-box-sm"><i class="bi bi-stars"></i></span>
+                    <div class="min-w-0">
+                        <div class="fw-semibold">@s.Nome</div>
+                        <div class="text-muted small">
+                            <i class="bi bi-clock me-1"></i>@s.DuracaoMinutos min
+                            · <a asp-action="Detalhes" asp-route-id="@p.ProfissionalId" asp-route-data="@dataRota">@p.Usuario?.Nome</a>
+                            @if (!string.IsNullOrWhiteSpace(p.Especialidade))
+                            {
+                                <span>· @p.Especialidade</span>
+                            }
                         </div>
                     </div>
-                    <i class="bi bi-chevron-right text-muted align-self-center"></i>
                 </div>
-            </a>
-        </div>
-    }
-</div>
+                <div class="text-end">
+                    <div class="price mb-1">@s.Preco.ToString("C")</div>
+                    @if (Model.PrimeiroLivreServico.TryGetValue(s.ServicoId, out var livre))
+                    {
+                        <div class="small text-success mb-1 text-nowrap"><i class="bi bi-clock me-1"></i>a partir das @livre.ToString("HH:mm")</div>
+                    }
+                    @if (User.IsInRole("Cliente"))
+                    {
+                        <a class="btn btn-sm btn-primary" asp-controller="Agendamentos" asp-action="CriarNovoAgendamento" asp-route-servicoId="@s.ServicoId" asp-route-data="@dataRota">Agendar</a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+        @foreach (var p in Model.Profissionais)
+        {
+            var nome = p.Usuario?.Nome ?? "";
+            // serviços que bateram com a busca aparecem primeiro e destacados
+            var servicos = p.Servicos.OrderByDescending(s => Destaca(s.Nome)).Take(3).ToList();
+            var restantes = p.Servicos.Count - servicos.Count;
+            <div class="col">
+                <a asp-action="Detalhes" asp-route-id="@p.ProfissionalId" asp-route-data="@dataRota" class="card h-100 text-reset">
+                    <div class="card-body d-flex gap-3">
+                        <span class="avatar avatar-lg">@(nome.Length > 0 ? nome[..1] : "?")</span>
+                        <div class="flex-grow-1 min-w-0">
+                            <h5 class="card-title mb-1">@nome</h5>
+                            @if (!string.IsNullOrWhiteSpace(p.Especialidade))
+                            {
+                                <p class="card-text text-muted small mb-2">@p.Especialidade</p>
+                            }
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                @foreach (var s in servicos)
+                                {
+                                    <span class="badge @(Destaca(s.Nome) ? "badge-soft-primary" : "badge-soft-secondary")">@s.Nome</span>
+                                }
+                                @if (restantes > 0)
+                                {
+                                    <span class="badge badge-soft-secondary">+@restantes</span>
+                                }
+                            </div>
+                            <div class="small text-muted">
+                                a partir de <span class="price">@p.Servicos.Min(s => s.Preco).ToString("C")</span>
+                            </div>
+                            @if (Model.PrimeiroLivreProfissional.TryGetValue(p.ProfissionalId, out var livre))
+                            {
+                                <div class="small text-success mt-1"><i class="bi bi-clock me-1"></i>Livre a partir das @livre.ToString("HH:mm")</div>
+                            }
+                        </div>
+                        <i class="bi bi-chevron-right text-muted align-self-center"></i>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <script>
+        const campoData = document.getElementById('filtroData');
+        const campoTurno = document.getElementById('filtroTurno');
+
+        // turno só faz sentido com um dia escolhido
+        const atualizarTurno = () => {
+            campoTurno.disabled = !campoData.value;
+            if (!campoData.value) campoTurno.value = '';
+        };
+        campoData.addEventListener('input', atualizarTurno);
+
+        document.querySelectorAll('[data-dia]').forEach(botao => {
+            botao.addEventListener('click', () => {
+                campoData.value = botao.dataset.dia;
+                atualizarTurno();
+            });
+        });
+    </script>
+}

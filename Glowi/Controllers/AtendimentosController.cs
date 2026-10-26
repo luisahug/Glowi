@@ -7,28 +7,21 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
 
 namespace Glowi.Controllers;
 
 [Authorize(Roles = "Profissional")]
 public class AtendimentosController : Controller
 {
-    private const int DiasMaximosNoFuturo = 30;
-    private const string FormatoInicio = "yyyy-MM-ddTHH:mm";
-
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly AgendaService _agenda;
 
     public AtendimentosController(
         ApplicationDbContext context,
-        UserManager<ApplicationUser> userManager,
-        AgendaService agenda)
+        UserManager<ApplicationUser> userManager)
     {
         _context = context;
         _userManager = userManager;
-        _agenda = agenda;
     }
 
     private async Task<int> ProfissionalLogadoIdAsync()
@@ -150,70 +143,6 @@ public class AtendimentosController : Controller
 
         if (Url.IsLocalUrl(returnUrl))
             return LocalRedirect(returnUrl);
-        return RedirectToAction(nameof(Index));
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Reagendar(int id, DateOnly? data)
-    {
-        var agendamento = await BuscarAgendamento(id);
-        if (agendamento == null)
-            return NotFound();
-
-        if (!agendamento.EmAberto)
-        {
-            TempData["Erro"] = "Esse agendamento não pode mais ser reagendado.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        var hoje = DateOnly.FromDateTime(Horario.Agora);
-        var maximo = hoje.AddDays(DiasMaximosNoFuturo);
-
-        var dia = data ?? DateOnly.FromDateTime(Horario.ParaBrasilia(agendamento.Inicio));
-        if (dia < hoje) dia = hoje;
-        if (dia > maximo) dia = maximo;
-
-        var vm = new ReagendarViewModel
-        {
-            Agendamento = agendamento,
-            Data = dia,
-            Hoje = hoje,
-            Maximo = maximo,
-            Horarios = await _agenda.ObterHorariosLivres(agendamento.ServicoId, dia, agendamento.AgendamentoId)
-        };
-
-        return View(vm);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Reagendar(int id, string inicio)
-    {
-        if (!DateTime.TryParseExact(inicio, FormatoInicio, CultureInfo.InvariantCulture, DateTimeStyles.None, out var novoInicio))
-            return BadRequest();
-
-        var agendamento = await BuscarAgendamento(id);
-        if (agendamento == null)
-            return NotFound();
-
-        if (!agendamento.EmAberto)
-        {
-            TempData["Erro"] = "Esse agendamento não pode mais ser reagendado.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        var erro = await _agenda.Reagendar(agendamento, novoInicio);
-        if (erro != null)
-        {
-            TempData["Erro"] = erro;
-            return RedirectToAction(nameof(Reagendar), new
-            {
-                id,
-                data = DateOnly.FromDateTime(novoInicio).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
-            });
-        }
-
-        TempData["Sucesso"] = $"Agendamento remarcado para {novoInicio:dd/MM 'às' HH:mm}. Avise a cliente!";
         return RedirectToAction(nameof(Index));
     }
 }

@@ -1,0 +1,29 @@
+@model Glowi.Models.ViewModels.ModalConfirmacaoViewModel
+
+<div class="modal fade modal-confirmacao" id="@Model.Id" tabindex="-1" aria-labelledby="@(Model.Id)Titulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            @* sem action: o script do site.js preenche com o data-acao do botão *@
+            <form method="post" asp-antiforgery="true">
+                <div class="modal-body text-center pt-4">
+                    <span class="icon-box icon-box-danger mb-3"><i class="bi @Model.Icone"></i></span>
+                    <h5 class="modal-title mb-2" id="@(Model.Id)Titulo">@Model.Titulo</h5>
+                    <p class="text-muted small mb-3">@Model.Texto</p>
+
+                    <div class="card bg-soft text-start">
+                        <div class="card-body py-2 px-3 small">
+                            <div class="fw-semibold" data-campo="resumo"></div>
+                            <div><i class="bi bi-calendar3 text-muted me-1"></i><span data-campo="quando"></span></div>
+                            <div class="text-muted" data-campo="pessoa"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer flex-nowrap">
+                    <button type="button" class="btn btn-secondary flex-grow-1" data-bs-dismiss="modal">@Model.Manter</button>
+                    <button type="submit" class="btn btn-danger flex-grow-1">@Model.Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
