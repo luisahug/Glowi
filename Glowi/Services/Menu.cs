@@ -1,9 +1,6 @@
 using System.Security.Claims;
 
 namespace Glowi.Services;
-
-// Rotulo: nome curto da barra inferior (celular). Ativo: rotas que deixam o item destacado,
-// "Controller" ou "Controller/Action" (Controller/Action vence quando dois itens batem).
 public record ItemMenu(
     string? Controller, string? Action, string Icone, string Cor,
     string Titulo, string Rotulo, string Texto, string[] Ativo)
@@ -16,7 +13,6 @@ public record ItemMenu(
 
 public static class Menu
 {
-    // atalhos de cada perfil: aparecem na navegação e nos cards da tela inicial
     public static List<ItemMenu> Atalhos(ClaimsPrincipal user)
     {
         var itens = new List<ItemMenu>();
@@ -38,8 +34,7 @@ public static class Menu
         return itens;
     }
 
-    // navegação completa: Início + atalhos + Conta.
-    // Com 4 atalhos o Início sai da barra do celular para caber (a logo no topo já leva ao início).
+    // com 4 atalhos o Início sai da barra do celular para caber (a logo no topo já leva ao início).
     public static List<ItemMenu> Navegacao(ClaimsPrincipal user)
     {
         var atalhos = Atalhos(user);

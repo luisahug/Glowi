@@ -6,8 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Glowi.ViewComponents;
-
-// sidebar (desktop) e barra inferior (celular) do usuário logado
 public class NavegacaoViewComponent : ViewComponent
 {
     private readonly ApplicationDbContext _context;

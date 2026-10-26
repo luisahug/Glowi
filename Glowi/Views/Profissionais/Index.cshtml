@@ -8,7 +8,6 @@
     var dataRota = Model.Data?.ToString("yyyy-MM-dd", inv);
     bool Destaca(string texto) => Model.Busca != null && texto.Contains(Model.Busca, StringComparison.OrdinalIgnoreCase);
 
-    // URL atual trocando (ou removendo, se valor = null) um parâmetro; mantém os demais filtros
     string UrlCom(string chave, string? valor)
     {
         var query = Context.Request.Query
@@ -60,7 +59,6 @@
         </div>
 
         <div class="offcanvas-body">
-            @* cada filtro é uma .filtro-secao; novos filtros (ex.: faixa de valor) entram aqui *@
             <section class="filtro-secao">
                 <label class="filtro-titulo" for="filtroTipo">Tipo de profissional</label>
                 <select class="form-select" name="tipo" id="filtroTipo" disabled="@(!Model.Tipos.Any())">
@@ -176,7 +174,6 @@ else
         @foreach (var p in Model.Profissionais)
         {
             var nome = p.Usuario?.Nome ?? "";
-            // serviços que bateram com a busca aparecem primeiro e destacados
             var servicos = p.Servicos.OrderByDescending(s => Destaca(s.Nome)).Take(3).ToList();
             var restantes = p.Servicos.Count - servicos.Count;
             <div class="col">
@@ -220,7 +217,6 @@ else
         const campoData = document.getElementById('filtroData');
         const campoTurno = document.getElementById('filtroTurno');
 
-        // turno só faz sentido com um dia escolhido
         const atualizarTurno = () => {
             campoTurno.disabled = !campoData.value;
             if (!campoData.value) campoTurno.value = '';

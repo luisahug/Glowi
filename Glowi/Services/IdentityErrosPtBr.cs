@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Glowi.Services;
 
-// Mensagens de erro do Identity (cadastro, senha, email) em português
+// mensagens de erro do Identity (cadastro, senha, email) em português
 public class IdentityErrosPtBr : IdentityErrorDescriber
 {
     public override IdentityError DefaultError() => Erro(nameof(DefaultError), "Ocorreu um erro desconhecido.");

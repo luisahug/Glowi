@@ -16,8 +16,7 @@ namespace Glowi.Controllers
             return View();
         }
 
-        // Vitrine dos componentes do glowi.css (só em desenvolvimento)
-        public IActionResult Estilos([FromServices] IWebHostEnvironment env)
+        public IActionResult Estilos([FromServices] IWebHostEnvironment env) //devdocs para consulta
         {
             if (!env.IsDevelopment()) return NotFound();
             return View();

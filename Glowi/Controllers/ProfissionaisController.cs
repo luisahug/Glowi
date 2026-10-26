@@ -25,8 +25,6 @@ namespace Glowi.Controllers
         private static string Contem(string texto) =>
             "%" + texto.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_") + "%";
 
-        // serviços da profissional que interessam para o filtro de agenda:
-        // os que bateram com a busca ou, se ela bateu só pelo nome/especialidade, todos
         private static IEnumerable<Servico> ServicosRelevantes(Profissional p, string? busca)
         {
             var encontrados = busca == null
