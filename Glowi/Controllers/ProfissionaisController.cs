@@ -143,6 +143,7 @@ namespace Glowi.Controllers
             var profissional = await _context.Profissionais
                 .Include(p => p.Usuario)
                 .Include(p => p.Servicos.OrderBy(s => s.Nome))
+                    .ThenInclude(s => s.Imagens.OrderBy(i => i.Ordem))
                 .FirstOrDefaultAsync(p => p.ProfissionalId == id);
 
             if (profissional == null)

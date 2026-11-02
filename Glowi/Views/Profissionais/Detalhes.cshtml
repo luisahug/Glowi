@@ -1,4 +1,5 @@
 ﻿@model Glowi.Models.Profissional
+@inject Glowi.Services.SupabaseStorageService Storage
 @{
     ViewData["Title"] = Model.Usuario?.Nome;
     var nome = Model.Usuario?.Nome ?? "";
@@ -31,21 +32,71 @@
 <div class="list-group">
     @foreach (var s in Model.Servicos)
     {
-        <div class="list-group-item d-flex justify-content-between align-items-center gap-3 py-3">
-            <div class="d-flex align-items-center gap-3">
-                <span class="icon-box icon-box-sm"><i class="bi bi-stars"></i></span>
-                <div>
-                    <div class="fw-semibold">@s.Nome</div>
-                    <div class="text-muted small"><i class="bi bi-clock me-1"></i>@s.DuracaoMinutos min</div>
+        var carrosselId = $"carrossel-{s.ServicoId}";
+        var variasImagens = s.Imagens.Count > 1;
+
+        <div class="list-group-item py-3">
+            <div class="d-flex justify-content-between align-items-center gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="icon-box icon-box-sm"><i class="bi bi-stars"></i></span>
+                    <div>
+                        <div class="fw-semibold">@s.Nome</div>
+                        <div class="text-muted small"><i class="bi bi-clock me-1"></i>@s.DuracaoMinutos min</div>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="price mb-1">@s.Preco.ToString("C")</div>
+                    @if (User.IsInRole("Cliente"))
+                    {
+                        <a class="btn btn-sm btn-primary" asp-controller="Agendamentos" asp-action="CriarNovoAgendamento" asp-route-servicoId="@s.ServicoId" asp-route-data="@(string.IsNullOrEmpty(data) ? null : data)">Agendar</a>
+                    }
                 </div>
             </div>
-            <div class="text-end">
-                <div class="price mb-1">@s.Preco.ToString("C")</div>
-                @if (User.IsInRole("Cliente"))
-                {
-                    <a class="btn btn-sm btn-primary" asp-controller="Agendamentos" asp-action="CriarNovoAgendamento" asp-route-servicoId="@s.ServicoId" asp-route-data="@(string.IsNullOrEmpty(data) ? null : data)">Agendar</a>
-                }
-            </div>
+
+            @if (s.Imagens.Any())
+            {
+                <div id="@carrosselId" class="carousel slide servico-carrossel mt-3 @(s.Imagens.Any(i => i.Descricao != null) ? "com-legenda" : "")"
+                     aria-label="Fotos de @s.Nome">
+                    @if (variasImagens)
+                    {
+                        <div class="carousel-indicators">
+                            @for (var i = 0; i < s.Imagens.Count; i++)
+                            {
+                                <button type="button" data-bs-target="#@carrosselId" data-bs-slide-to="@i"
+                                        class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : null)"
+                                        aria-label="Foto @(i + 1)"></button>
+                            }
+                        </div>
+                    }
+
+                    <div class="carousel-inner">
+                        @{ var primeira = true; }
+                        @foreach (var imagem in s.Imagens)
+                        {
+                            <div class="carousel-item @(primeira ? "active" : "")">
+                                <img src="@Storage.UrlPublica(imagem.CaminhoBucket)" alt="@(imagem.Descricao ?? s.Nome)" />
+                                @if (imagem.Descricao != null)
+                                {
+                                    <div class="carousel-caption">@imagem.Descricao</div>
+                                }
+                            </div>
+                            primeira = false;
+                        }
+                    </div>
+
+                    @if (variasImagens)
+                    {
+                        <button class="carousel-control-prev" type="button" data-bs-target="#@carrosselId" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Anterior</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#@carrosselId" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Próxima</span>
+                        </button>
+                    }
+                </div>
+            }
         </div>
     }
 </div>

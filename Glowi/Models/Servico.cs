@@ -18,5 +18,7 @@ namespace Glowi.Models
         [Display(Name = "Preço")]
         [Range(0.01, 10000, ErrorMessage = "Informe um preço válido.")]
         public decimal Preco { get; set; }
+
+        public ICollection<ServicoImagem> Imagens { get; set; } = new List<ServicoImagem>();
     }
 }

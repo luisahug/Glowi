@@ -5,7 +5,7 @@
 
 <div class="page-header">
     <h1>Meus serviços</h1>
-    <p>Toque em um serviço para editar.</p>
+    <p>Toque em um serviço para editar ou adicione imagens para as clientes verem seu trabalho.</p>
 </div>
 
 <partial name="_Alertas" />
@@ -25,19 +25,24 @@
     @foreach (var s in Model)
     {
         <div class="col">
-            <button type="button" class="card h-100 w-100 p-0 text-start"
-                    data-bs-toggle="modal" data-bs-target="#modalServico"
-                    data-modo="editar"
-                    data-id="@s.ServicoId"
-                    data-nome="@s.Nome"
-                    data-duracao="@s.DuracaoMinutos"
-                    data-preco="@s.Preco.ToString("0.00")">
-                <div class="card-body w-100">
+            <div class="card h-100">
+                <button type="button" class="card-body card-acao text-start"
+                        data-bs-toggle="modal" data-bs-target="#modalServico"
+                        data-modo="editar"
+                        data-id="@s.ServicoId"
+                        data-nome="@s.Nome"
+                        data-duracao="@s.DuracaoMinutos"
+                        data-preco="@s.Preco.ToString("0.00")">
                     <h5 class="card-title">@s.Nome</h5>
                     <p class="card-text text-muted mb-1"><i class="bi bi-clock me-1"></i>@s.DuracaoMinutos min</p>
                     <p class="card-text price mb-0">@s.Preco.ToString("C")</p>
+                </button>
+                <div class="card-footer bg-transparent">
+                    <a class="btn btn-sm btn-outline-primary w-100" asp-action="Imagens" asp-route-id="@s.ServicoId">
+                        <i class="bi bi-images me-1"></i>@(s.Imagens.Any() ? $"Imagens ({s.Imagens.Count})" : "Add imagens")
+                    </a>
                 </div>
-            </button>
+            </div>
         </div>
     }
 </div>
@@ -118,7 +123,7 @@
         });
 
         btnExcluir.addEventListener('click', () => {
-            if (confirm('Excluir este serviço?')) {
+            if (confirm('Excluir este serviço? As imagens dele também serão apagadas.')) {
                 formExcluir.action = '@Url.Action("Delete", "Servicos")/' + btnExcluir.dataset.id;
                 formExcluir.submit();
             }

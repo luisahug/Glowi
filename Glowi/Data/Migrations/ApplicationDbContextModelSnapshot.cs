@@ -252,6 +252,39 @@ namespace Glowi.Data.Migrations
                     b.ToTable("Servico");
                 });
 
+            modelBuilder.Entity("Glowi.Models.ServicoImagem", b =>
+                {
+                    b.Property<int>("ServicoImagemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ServicoImagemId"));
+
+                    b.Property<string>("CaminhoBucket")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<int>("Ordem")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ServicoId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ServicoImagemId");
+
+                    b.HasIndex("ServicoId", "Ordem");
+
+                    b.ToTable("ServicoImagens");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -457,6 +490,17 @@ namespace Glowi.Data.Migrations
                     b.Navigation("Profissional");
                 });
 
+            modelBuilder.Entity("Glowi.Models.ServicoImagem", b =>
+                {
+                    b.HasOne("Glowi.Models.Servico", "Servico")
+                        .WithMany("Imagens")
+                        .HasForeignKey("ServicoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Servico");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -511,6 +555,11 @@ namespace Glowi.Data.Migrations
             modelBuilder.Entity("Glowi.Models.Profissional", b =>
                 {
                     b.Navigation("Servicos");
+                });
+
+            modelBuilder.Entity("Glowi.Models.Servico", b =>
+                {
+                    b.Navigation("Imagens");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,0 +1,131 @@
+@model Glowi.Models.Servico
+@inject Glowi.Services.SupabaseStorageService Storage
+@{
+    ViewData["Title"] = $"Imagens · {Model.Nome}";
+    var maximo = Glowi.Models.ServicoImagem.MaximoPorServico;
+    var podeAdicionar = Model.Imagens.Count < maximo;
+
+    var modalRemover = new Glowi.Models.ViewModels.ModalConfirmacaoViewModel
+    {
+        Id = "modalRemoverImagem",
+        Titulo = "Remover imagem?",
+        Texto = "Ela deixa de aparecer para as clientes. Essa ação não pode ser desfeita.",
+        Icone = "bi-image",
+        Confirmar = "Sim, remover"
+    };
+}
+
+<a asp-action="Index" class="link-back"><i class="bi bi-arrow-left"></i> Meus serviços</a>
+
+<div class="page-header">
+    <h1>Imagens · @Model.Nome</h1>
+    <p>Mostre seu trabalho: as clientes veem essas fotos ao escolher o serviço. @Model.Imagens.Count de @maximo imagens.</p>
+</div>
+
+<partial name="_Alertas" />
+
+@if (podeAdicionar)
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="post" asp-action="AdicionarImagem" asp-route-id="@Model.ServicoId" enctype="multipart/form-data" id="formImagem">
+                <div class="row g-3 align-items-start">
+                    <div class="col-sm-4">
+                        <label class="upload-preview" for="campoArquivo">
+                            <img id="previewImagem" alt="" hidden />
+                            <span id="previewVazio"><i class="bi bi-image fs-2 d-block mb-1"></i>Escolher foto</span>
+                        </label>
+                    </div>
+                    <div class="col-sm-8">
+                        <input type="file" name="arquivo" id="campoArquivo" class="form-control mb-1" required
+                               accept="image/jpeg,image/png,image/webp" />
+                        <div class="form-text mb-3">JPG, PNG ou WEBP, até @(Glowi.Services.SupabaseStorageService.TamanhoMaximoBytes / 1024 / 1024) MB.</div>
+
+                        <div class="form-floating mb-1">
+                            <input name="descricao" id="campoDescricao" class="form-control" placeholder="Descrição" maxlength="120" />
+                            <label for="campoDescricao">Descrição curta (opcional)</label>
+                        </div>
+                        <div class="form-text text-end mb-3"><span id="contadorDescricao">0</span>/120</div>
+
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-upload me-1"></i>Adicionar imagem</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info d-flex gap-2">
+        <i class="bi bi-info-circle-fill"></i>
+        <div>Você chegou ao limite de @maximo imagens. Remova uma para adicionar outra.</div>
+    </div>
+}
+
+@if (!Model.Imagens.Any())
+{
+    <div class="empty-state">
+        <span class="icon-box"><i class="bi bi-images"></i></span>
+        <p>Nenhuma imagem ainda. Adicione a primeira acima.</p>
+    </div>
+}
+else
+{
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+        @foreach (var imagem in Model.Imagens)
+        {
+            <div class="col">
+                <div class="card h-100 overflow-hidden">
+                    <img src="@Storage.UrlPublica(imagem.CaminhoBucket)" alt="@(imagem.Descricao ?? Model.Nome)" class="galeria-imagem" loading="lazy" />
+                    <div class="card-body p-2 d-flex justify-content-between align-items-start gap-2">
+                        <span class="small @(imagem.Descricao == null ? "text-muted fst-italic" : "")">@(imagem.Descricao ?? "Sem descrição")</span>
+                        <button type="button" class="btn btn-sm btn-icon btn-outline-danger border-0 flex-shrink-0" aria-label="Remover imagem"
+                                data-bs-toggle="modal" data-bs-target="#modalRemoverImagem"
+                                data-acao="@Url.Action("RemoverImagem", new { id = imagem.ServicoImagemId })"
+                                data-resumo="@(imagem.Descricao ?? "Imagem sem descrição")">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<partial name="_ModalConfirmacao" model="modalRemover" />
+
+@section Scripts {
+    <script>
+        const form = document.getElementById('formImagem');
+        if (form) {
+            const tamanhoMaximo = @Glowi.Services.SupabaseStorageService.TamanhoMaximoBytes;
+            const campoArquivo = document.getElementById('campoArquivo');
+            const preview = document.getElementById('previewImagem');
+            const previewVazio = document.getElementById('previewVazio');
+            const campoDescricao = document.getElementById('campoDescricao');
+            const contador = document.getElementById('contadorDescricao');
+
+            campoArquivo.addEventListener('change', () => {
+                const arquivo = campoArquivo.files[0];
+                campoArquivo.setCustomValidity(arquivo && arquivo.size > tamanhoMaximo ? 'A imagem deve ter no máximo 5 MB.' : '');
+                campoArquivo.reportValidity();
+
+                if (preview.src) URL.revokeObjectURL(preview.src);
+                preview.hidden = !arquivo;
+                previewVazio.hidden = !!arquivo;
+                if (arquivo) preview.src = URL.createObjectURL(arquivo);
+            });
+
+            campoDescricao.addEventListener('input', () => {
+                contador.textContent = campoDescricao.value.length;
+            });
+
+            // evita enviar duas vezes enquanto o upload acontece
+            form.addEventListener('submit', () => {
+                const botao = form.querySelector('[type=submit]');
+                botao.disabled = true;
+                botao.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Enviando...';
+            });
+        }
+    </script>
+}

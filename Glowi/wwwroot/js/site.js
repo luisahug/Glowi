@@ -13,8 +13,12 @@ document.querySelectorAll('.modal-confirmacao').forEach(modal => {
         const dados = evento.relatedTarget.dataset;
         form.action = dados.acao;
         modal.querySelectorAll('[data-campo]').forEach(campo => {
-            campo.textContent = dados[campo.dataset.campo] ?? '';
+            const valor = dados[campo.dataset.campo] ?? '';
+            campo.textContent = valor;
+            campo.closest('.modal-confirmacao-linha').hidden = !valor;
         });
+        const resumo = modal.querySelector('.modal-confirmacao-resumo');
+        if (resumo) resumo.hidden = !resumo.querySelector('.modal-confirmacao-linha:not([hidden])');
         botaoConfirmar.disabled = false;
     });
 

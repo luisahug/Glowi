@@ -16,6 +16,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Servico> Servico => Set<Servico>();
     public DbSet<Disponibilidade> Disponibilidades => Set<Disponibilidade>();
     public DbSet<Agendamento> Agendamentos => Set<Agendamento>();
+    public DbSet<ServicoImagem> ServicoImagens => Set<ServicoImagem>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -33,6 +34,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<Profissional>().Property(p => p.IntervaloMinutos).HasDefaultValue(15);
         builder.Entity<Profissional>().Property(p => p.AntecedenciaMinimaHoras).HasDefaultValue(2);
+
+        builder.Entity<ServicoImagem>(i =>
+        {
+            i.HasOne(x => x.Servico).WithMany(s => s.Imagens).HasForeignKey(x => x.ServicoId).OnDelete(DeleteBehavior.Cascade);
+            i.HasIndex(x => new { x.ServicoId, x.Ordem });
+        });
 
         builder.Entity<Agendamento>(a =>
         {
