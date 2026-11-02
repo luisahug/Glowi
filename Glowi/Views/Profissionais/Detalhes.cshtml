@@ -2,7 +2,6 @@
 @{
     ViewData["Title"] = Model.Usuario?.Nome;
     var nome = Model.Usuario?.Nome ?? "";
-    // dia escolhido no filtro de agenda da busca: o agendamento já abre nele
     var data = Context.Request.Query["data"].ToString();
 }
 

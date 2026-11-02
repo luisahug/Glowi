@@ -8,7 +8,10 @@ using Microsoft.AspNetCore.Localization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(connectionString))
+    throw new InvalidOperationException(
+        "Connection string 'DefaultConnection' não configurada. Em dev: dotnet user-secrets set \"ConnectionStrings:DefaultConnection\" \"...\"");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -21,6 +24,9 @@ options.SignIn.RequireConfirmedAccount = false)
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<Glowi.Services.AgendaService>();
+builder.Services.Configure<Glowi.Services.SupabaseStorageOptions>(
+    builder.Configuration.GetSection(Glowi.Services.SupabaseStorageOptions.Secao));
+builder.Services.AddHttpClient<Glowi.Services.SupabaseStorageService>();
 
 var app = builder.Build();
 
