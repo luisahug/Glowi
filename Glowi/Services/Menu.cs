@@ -22,13 +22,14 @@ public static class Menu
             itens.Add(new("Atendimentos", "Agenda", "bi-calendar-week", "", "Agenda", "Agenda", "Sua semana e seu dia de atendimentos", new[] { "Atendimentos/Agenda" }));
             itens.Add(new("Atendimentos", "Index", "bi-bell", "icon-box-pink", "Agendamentos", "Pedidos", "Confirme ou recuse pedidos", new[] { "Atendimentos" }) { Pendentes = true });
             itens.Add(new("Servicos", "Index", "bi-stars", "icon-box-amber", "Meus serviços", "Serviços", "Cadastre preços e duração", new[] { "Servicos" }));
-            itens.Add(new("Disponibilidades", "Index", "bi-clock", "icon-box-teal", "Meus horários", "Horários", "Defina quando você atende", new[] { "Disponibilidades" }));
+            itens.Add(new("Disponibilidades", "Index", "bi-clock", "icon-box-teal", "Meus horários", "Horários", "Defina quando você atende", new[] { "Disponibilidades", "Bloqueios" }));
         }
 
         if (user.IsInRole("Cliente"))
         {
             itens.Add(new("Profissionais", "Index", "bi-search-heart", "", "Agendar", "Agendar", "Encontre profissionais e serviços", new[] { "Profissionais", "Agendamentos" }));
             itens.Add(new("Agendamentos", "MeusAgendamentos", "bi-calendar-check", "icon-box-pink", "Meus agendamentos", "Agendamentos", "Acompanhe seus horários marcados", new[] { "Agendamentos/MeusAgendamentos" }));
+            itens.Add(new("Favoritos", "Index", "bi-heart", "icon-box-amber", "Minhas favoritas", "Favoritas", "Suas profissionais preferidas", new[] { "Favoritos" }));
         }
 
         return itens;

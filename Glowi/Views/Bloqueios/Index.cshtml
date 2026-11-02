@@ -1,0 +1,180 @@
+@model IEnumerable<Glowi.Models.BloqueioAgenda>
+@using Glowi.Services
+@{
+    ViewData["Title"] = "Bloqueios de agenda";
+
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    var agora = Horario.Agora;
+    var hoje = DateOnly.FromDateTime(agora).ToString("yyyy-MM-dd", inv);
+
+    // bloqueio de dia inteiro vai de 00:00 até 00:00 do dia seguinte ao último dia
+    string Periodo(BloqueioAgenda b)
+    {
+        var inicio = Horario.ParaBrasilia(b.Inicio);
+        var fim = Horario.ParaBrasilia(b.Fim);
+
+        if (inicio.TimeOfDay == TimeSpan.Zero && fim.TimeOfDay == TimeSpan.Zero)
+        {
+            var ultimoDia = fim.AddDays(-1);
+            return inicio.Date == ultimoDia.Date
+                ? $"{inicio:dddd, dd/MM} · dia inteiro"
+                : $"{inicio:dd/MM} a {ultimoDia:dd/MM} · dias inteiros";
+        }
+
+        return inicio.Date == fim.Date
+            ? $"{inicio:dddd, dd/MM} · {inicio:HH:mm} – {fim:HH:mm}"
+            : $"{inicio:dd/MM 'às' HH:mm} até {fim:dd/MM 'às' HH:mm}";
+    }
+
+    var modalRemover = new Glowi.Models.ViewModels.ModalConfirmacaoViewModel
+    {
+        Id = "modalRemover",
+        Titulo = "Remover bloqueio?",
+        Texto = "Os horários desse período voltam a aparecer para as clientes.",
+        Icone = "bi-unlock",
+        Manter = "Manter",
+        Confirmar = "Sim, remover"
+    };
+}
+
+<a asp-controller="Disponibilidades" asp-action="Index" class="link-back"><i class="bi bi-arrow-left"></i> Meus horários</a>
+
+<div class="page-header d-flex flex-wrap justify-content-between align-items-end gap-2">
+    <div>
+        <h1>Bloqueios de agenda</h1>
+        <p>Bloqueie dias ou horários em que você não vai atender (folga, férias, compromissos). As clientes não conseguem agendar nesses períodos.</p>
+    </div>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalBloqueio">
+        <i class="bi bi-plus-lg"></i> Bloquear período
+    </button>
+</div>
+
+<partial name="_Alertas" />
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <span class="icon-box"><i class="bi bi-calendar-check"></i></span>
+        <p>Você não tem nenhum bloqueio. Sua agenda segue os seus horários de atendimento.</p>
+    </div>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var b in Model)
+        {
+            var periodo = Periodo(b);
+            var emAndamento = Horario.ParaBrasilia(b.Inicio) <= agora;
+
+            <div class="list-group-item py-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="icon-box icon-box-sm icon-box-danger"><i class="bi bi-slash-circle"></i></span>
+                        <div>
+                            <div class="fw-semibold">@periodo</div>
+                            @if (b.Motivo != null)
+                            {
+                                <div class="text-muted small">@b.Motivo</div>
+                            }
+                            @if (emAndamento)
+                            {
+                                <span class="badge badge-soft-warning mt-1">Em andamento</span>
+                            }
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-sm btn-outline-danger"
+                            data-bs-toggle="modal" data-bs-target="#modalRemover"
+                            data-acao="@Url.Action("Delete", new { id = b.BloqueioAgendaId })"
+                            data-resumo="@(b.Motivo ?? "Bloqueio")"
+                            data-quando="@periodo">
+                        Remover
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="modal fade" id="modalBloqueio" tabindex="-1" aria-labelledby="modalBloqueioTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" asp-controller="Bloqueios" asp-action="Create">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalBloqueioTitulo">Bloquear período</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" name="diaInteiro" value="true" id="campoDiaInteiro" checked />
+                        <label class="form-check-label" for="campoDiaInteiro">Dia inteiro</label>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col">
+                            <div class="form-floating">
+                                <input name="dataInicio" id="campoDataInicio" type="date" class="form-control" required min="@hoje" value="@hoje" />
+                                <label for="campoDataInicio">De</label>
+                            </div>
+                        </div>
+                        <div class="col campo-hora" hidden>
+                            <div class="form-floating">
+                                <input name="horaInicio" id="campoHoraInicio" type="time" class="form-control" step="900" value="08:00" />
+                                <label for="campoHoraInicio">Hora</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col">
+                            <div class="form-floating">
+                                <input name="dataFim" id="campoDataFim" type="date" class="form-control" required min="@hoje" value="@hoje" />
+                                <label for="campoDataFim">Até</label>
+                            </div>
+                        </div>
+                        <div class="col campo-hora" hidden>
+                            <div class="form-floating">
+                                <input name="horaFim" id="campoHoraFim" type="time" class="form-control" step="900" value="12:00" />
+                                <label for="campoHoraFim">Hora</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-floating">
+                        <input name="motivo" id="campoMotivo" class="form-control" maxlength="120" placeholder="Motivo" />
+                        <label for="campoMotivo">Motivo (opcional, só você vê)</label>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Bloquear</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<partial name="_ModalConfirmacao" model="modalRemover" />
+
+@section Scripts {
+    <script>
+        const diaInteiro = document.getElementById('campoDiaInteiro');
+        const dataInicio = document.getElementById('campoDataInicio');
+        const dataFim = document.getElementById('campoDataFim');
+
+        diaInteiro.addEventListener('change', () => {
+            document.querySelectorAll('.campo-hora').forEach(campo => {
+                campo.hidden = diaInteiro.checked;
+                campo.querySelector('input').required = !diaInteiro.checked;
+            });
+        });
+
+        // "Até" nunca fica antes de "De"
+        dataInicio.addEventListener('change', () => {
+            dataFim.min = dataInicio.value;
+            if (dataFim.value < dataInicio.value) dataFim.value = dataInicio.value;
+        });
+    </script>
+}

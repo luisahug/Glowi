@@ -17,6 +17,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Disponibilidade> Disponibilidades => Set<Disponibilidade>();
     public DbSet<Agendamento> Agendamentos => Set<Agendamento>();
     public DbSet<ServicoImagem> ServicoImagens => Set<ServicoImagem>();
+    public DbSet<Favorito> Favoritos => Set<Favorito>();
+    public DbSet<BloqueioAgenda> BloqueiosAgenda => Set<BloqueioAgenda>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -48,6 +50,19 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             a.HasOne(x => x.Servico).WithMany().HasForeignKey(x => x.ServicoId).OnDelete(DeleteBehavior.Restrict);
             a.HasIndex(x => new { x.ProfissionalId, x.Inicio });
             a.Property(x => x.Preco).HasPrecision(10, 2);
+        });
+
+        builder.Entity<Favorito>(f =>
+        {
+            f.HasOne(x => x.Cliente).WithMany().HasForeignKey(x => x.ClienteId).OnDelete(DeleteBehavior.Cascade);
+            f.HasOne(x => x.Profissional).WithMany().HasForeignKey(x => x.ProfissionalId).OnDelete(DeleteBehavior.Cascade);
+            f.HasIndex(x => new { x.ClienteId, x.ProfissionalId }).IsUnique();
+        });
+
+        builder.Entity<BloqueioAgenda>(b =>
+        {
+            b.HasOne(x => x.Profissional).WithMany().HasForeignKey(x => x.ProfissionalId).OnDelete(DeleteBehavior.Cascade);
+            b.HasIndex(x => new { x.ProfissionalId, x.Inicio });
         });
     }
 }

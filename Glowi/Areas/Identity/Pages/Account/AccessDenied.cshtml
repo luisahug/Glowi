@@ -1,0 +1,11 @@
+@page
+@model AccessDeniedModel
+@{
+    ViewData["Title"] = "Acesso negado";
+}
+
+<div class="text-center py-5">
+    <div class="display-3 fw-bold text-gradient mb-2">403</div>
+    <p class="lead text-muted mb-4">Você não tem permissão para acessar esta página.</p>
+    <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-primary"><i class="bi bi-house"></i> Voltar ao início</a>
+</div>

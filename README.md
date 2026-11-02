@@ -1,6 +1,8 @@
 # Glowi
 Sistema de agendamento de serviços de beleza
 
+As regras de negócio (agendamento, status, cancelamento, bloqueios, favoritas) estão em [REGRAS_DE_NEGOCIO.md](REGRAS_DE_NEGOCIO.md).
+
 ## Configuração local
 
 ### Pré-requisitos

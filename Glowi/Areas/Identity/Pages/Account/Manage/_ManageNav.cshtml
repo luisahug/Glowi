@@ -1,6 +1,11 @@
-<nav class="nav nav-pills account-nav">
-    <a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index"><i class="bi bi-person"></i> Perfil</a>
-    <a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email"><i class="bi bi-envelope"></i> Email</a>
-    <a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword"><i class="bi bi-key"></i> Senha</a>
-    <a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData"><i class="bi bi-shield-lock"></i> Dados pessoais</a>
-</nav>
+@* no celular o menu vira uma linha com rolagem; as setas aparecem quando há abas escondidas (site.js) *@
+<div class="rolagem-setas">
+    <button type="button" class="rolagem-seta rolagem-seta-esq d-lg-none" aria-label="Ver abas anteriores" hidden><i class="bi bi-chevron-left"></i></button>
+    <nav class="nav nav-pills account-nav rolagem-lista">
+        <a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index"><i class="bi bi-person"></i> Perfil</a>
+        <a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email"><i class="bi bi-envelope"></i> Email</a>
+        <a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword"><i class="bi bi-key"></i> Senha</a>
+        <a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData"><i class="bi bi-shield-lock"></i> Dados pessoais</a>
+    </nav>
+    <button type="button" class="rolagem-seta rolagem-seta-dir d-lg-none" aria-label="Ver próximas abas" hidden><i class="bi bi-chevron-right"></i></button>
+</div>

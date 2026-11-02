@@ -952,6 +952,41 @@ a.card, button.card {
     }
 }
 
+/* Setas de rolagem horizontal (ex.: abas de Minha conta no celular) */
+.rolagem-setas {
+    position: relative;
+}
+
+.rolagem-seta {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 1px solid var(--glowi-border);
+    border-radius: 50%;
+    background: var(--glowi-surface);
+    box-shadow: var(--glowi-shadow);
+    color: var(--glowi-700);
+    transform: translateY(-50%);
+}
+
+    .rolagem-seta[hidden] {
+        display: none;
+    }
+
+.rolagem-seta-esq {
+    left: -.35rem;
+}
+
+.rolagem-seta-dir {
+    right: -.35rem;
+}
+
 .dropdown-menu {
     --bs-dropdown-border-color: var(--glowi-border);
     --bs-dropdown-border-radius: var(--glowi-radius);

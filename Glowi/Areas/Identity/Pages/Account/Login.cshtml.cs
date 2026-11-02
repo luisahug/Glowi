@@ -65,23 +65,25 @@ public class LoginModel : PageModel
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "Informe seu email.")]
+        [EmailAddress(ErrorMessage = "Informe um email válido.")]
+        [Display(Name = "Email")]
         public string Email { get; set; } = default!;
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "Informe sua senha.")]
         [DataType(DataType.Password)]
+        [Display(Name = "Senha")]
         public string Password { get; set; } = default!;
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        [Display(Name = "Remember me?")]
+        [Display(Name = "Lembrar de mim")]
         public bool RememberMe { get; set; }
     }
 
@@ -129,7 +131,7 @@ public class LoginModel : PageModel
             }
             else
             {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                ModelState.AddModelError(string.Empty, "Email ou senha incorretos.");
                 return Page();
             }
         }

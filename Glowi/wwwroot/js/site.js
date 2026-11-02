@@ -28,6 +28,29 @@ document.querySelectorAll('.modal-confirmacao').forEach(modal => {
     });
 });
 
+// Rolagem horizontal com setas (.rolagem-setas): cada seta só aparece se houver itens escondidos daquele lado
+document.querySelectorAll('.rolagem-setas').forEach(caixa => {
+    const lista = caixa.querySelector('.rolagem-lista');
+    const esquerda = caixa.querySelector('.rolagem-seta-esq');
+    const direita = caixa.querySelector('.rolagem-seta-dir');
+
+    const atualizar = () => {
+        esquerda.hidden = lista.scrollLeft <= 1;
+        direita.hidden = lista.scrollLeft + lista.clientWidth >= lista.scrollWidth - 1;
+    };
+
+    esquerda.addEventListener('click', () => lista.scrollBy({ left: -lista.clientWidth * 0.7, behavior: 'smooth' }));
+    direita.addEventListener('click', () => lista.scrollBy({ left: lista.clientWidth * 0.7, behavior: 'smooth' }));
+    lista.addEventListener('scroll', atualizar, { passive: true });
+    window.addEventListener('resize', atualizar);
+
+    // deixa o item da página atual visível
+    const ativo = lista.querySelector('.active');
+    if (ativo) lista.scrollLeft = ativo.offsetLeft - (lista.clientWidth - ativo.offsetWidth) / 2;
+
+    atualizar();
+});
+
 // PWA: registra o service worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

@@ -134,6 +134,37 @@ namespace Glowi.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Glowi.Models.BloqueioAgenda", b =>
+                {
+                    b.Property<int>("BloqueioAgendaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BloqueioAgendaId"));
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Fim")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Inicio")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Motivo")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<int>("ProfissionalId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("BloqueioAgendaId");
+
+                    b.HasIndex("ProfissionalId", "Inicio");
+
+                    b.ToTable("BloqueiosAgenda");
+                });
+
             modelBuilder.Entity("Glowi.Models.Cliente", b =>
                 {
                     b.Property<int>("ClienteId")
@@ -182,6 +213,33 @@ namespace Glowi.Data.Migrations
                     b.HasIndex("ProfissionalId");
 
                     b.ToTable("Disponibilidades");
+                });
+
+            modelBuilder.Entity("Glowi.Models.Favorito", b =>
+                {
+                    b.Property<int>("FavoritoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("FavoritoId"));
+
+                    b.Property<int>("ClienteId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ProfissionalId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("FavoritoId");
+
+                    b.HasIndex("ProfissionalId");
+
+                    b.HasIndex("ClienteId", "ProfissionalId")
+                        .IsUnique();
+
+                    b.ToTable("Favoritos");
                 });
 
             modelBuilder.Entity("Glowi.Models.Profissional", b =>
@@ -448,6 +506,17 @@ namespace Glowi.Data.Migrations
                     b.Navigation("Servico");
                 });
 
+            modelBuilder.Entity("Glowi.Models.BloqueioAgenda", b =>
+                {
+                    b.HasOne("Glowi.Models.Profissional", "Profissional")
+                        .WithMany()
+                        .HasForeignKey("ProfissionalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Profissional");
+                });
+
             modelBuilder.Entity("Glowi.Models.Cliente", b =>
                 {
                     b.HasOne("Glowi.Models.ApplicationUser", "Usuario")
@@ -466,6 +535,25 @@ namespace Glowi.Data.Migrations
                         .HasForeignKey("ProfissionalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Profissional");
+                });
+
+            modelBuilder.Entity("Glowi.Models.Favorito", b =>
+                {
+                    b.HasOne("Glowi.Models.Cliente", "Cliente")
+                        .WithMany()
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Glowi.Models.Profissional", "Profissional")
+                        .WithMany()
+                        .HasForeignKey("ProfissionalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cliente");
 
                     b.Navigation("Profissional");
                 });

@@ -7,6 +7,7 @@ public class SupabaseStorageOptions
 
     public string ServiceKey { get; set; } = string.Empty;
 
+    // nome exato do bucket no Supabase: a URL pública diferencia maiúsculas de minúsculas
     public string Bucket { get; set; } = string.Empty;
 
     public string UrlPublica(string caminho) =>

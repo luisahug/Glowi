@@ -76,8 +76,8 @@ public class RegisterModel : PageModel
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "Informe seu email.")]
+        [EmailAddress(ErrorMessage = "Informe um email válido.")]
         [Display(Name = "Email")]
         public string Email { get; set; } = default!;
 
@@ -85,7 +85,7 @@ public class RegisterModel : PageModel
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        [Required]
+        [Required(ErrorMessage = "Informe uma senha.")]
         [StringLength(100, ErrorMessage = "A {0} deve ter pelo menos {2} e no máximo {1} caracteres.", MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "Senha")]
@@ -100,11 +100,11 @@ public class RegisterModel : PageModel
         [Compare("Password", ErrorMessage = "Senha e confirmação não conferem.")]
         public string? ConfirmPassword { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Informe seu nome.")]
         [Display(Name = "Nome")]
         public string Nome { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Escolha se você é cliente ou profissional.")]
         [Display(Name = "Tipo")] //profissional ou cliente
         public string Tipo { get; set; }
 
@@ -131,6 +131,10 @@ public class RegisterModel : PageModel
         returnUrl ??= Url.Content("~/");
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
+        // valida antes de criar o usuário, para não sobrar conta sem perfil
+        if (Input.Tipo != "Cliente" && Input.Tipo != "Profissional")
+            ModelState.AddModelError("Input.Tipo", "Escolha se você é cliente ou profissional.");
+
         if (Input.Tipo == "Profissional" && string.IsNullOrWhiteSpace(Input.Especialidade))
             ModelState.AddModelError("Input.Especialidade", "Informe sua especialidade.");
 
@@ -146,9 +150,6 @@ public class RegisterModel : PageModel
             if (result.Succeeded)
             {
                 _logger.LogInformation("User created a new account with password.");
-
-                if (Input.Tipo != "Cliente" && Input.Tipo != "Profissional")
-                    return BadRequest();
 
                 await _userManager.AddToRoleAsync(user, Input.Tipo);
 

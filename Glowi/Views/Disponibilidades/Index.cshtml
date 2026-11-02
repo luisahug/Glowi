@@ -12,9 +12,14 @@
     string NomeDia(DayOfWeek d) => cultura.TextInfo.ToTitleCase(cultura.DateTimeFormat.GetDayName(d));
 }
 
-<div class="page-header">
-    <h1>Meus horários</h1>
-    <p>Defina em quais horários você atende em cada dia da semana. As clientes só conseguem agendar dentro desses horários.</p>
+<div class="page-header d-flex flex-wrap justify-content-between align-items-end gap-2">
+    <div>
+        <h1>Meus horários</h1>
+        <p>Defina em quais horários você atende em cada dia da semana. As clientes só conseguem agendar dentro desses horários.</p>
+    </div>
+    <a class="btn btn-outline-primary" asp-controller="Bloqueios" asp-action="Index">
+        <i class="bi bi-slash-circle"></i> Bloquear dias e horários
+    </a>
 </div>
 
 <partial name="_Alertas" />

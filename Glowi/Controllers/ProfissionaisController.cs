@@ -5,6 +5,7 @@ using Glowi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Glowi.Controllers
 {
@@ -53,7 +54,8 @@ namespace Glowi.Controllers
                 Data = data,
                 Turno = turno,
                 Hoje = hoje,
-                Maximo = maximo
+                Maximo = maximo,
+                Favoritas = await FavoritasDoUsuario()
             };
 
             var especialidades = await _context.Profissionais
@@ -149,8 +151,28 @@ namespace Glowi.Controllers
             if (profissional == null)
                 return NotFound();
 
+            if (User.IsInRole("Cliente"))
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                ViewData["Favorita"] = await _context.Favoritos
+                    .AnyAsync(f => f.Cliente!.UsuarioId == userId && f.ProfissionalId == id);
+            }
+
             return View(profissional);
         }
 
+        // ids das profissionais favoritas da cliente logada (vazio para profissionais)
+        private async Task<HashSet<int>> FavoritasDoUsuario()
+        {
+            if (!User.IsInRole("Cliente"))
+                return new HashSet<int>();
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return (await _context.Favoritos
+                    .Where(f => f.Cliente!.UsuarioId == userId)
+                    .Select(f => f.ProfissionalId)
+                    .ToListAsync())
+                .ToHashSet();
+        }
     }
 }

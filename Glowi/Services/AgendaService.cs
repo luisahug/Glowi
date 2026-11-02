@@ -44,10 +44,20 @@ public class AgendaService
             .Select(a => (Inicio: Horario.ParaBrasilia(a.Inicio), Fim: Horario.ParaBrasilia(a.Fim)))
             .ToList();
 
+        // bloqueios da profissional contam como horário ocupado
+        var bloqueios = (await _context.BloqueiosAgenda
+                .Where(b => b.ProfissionalId == prof.ProfissionalId
+                         && b.Inicio < fimDia
+                         && b.Fim > inicioDia)
+                .Select(b => new { b.Inicio, b.Fim })
+                .ToListAsync())
+            .Select(b => (Inicio: Horario.ParaBrasilia(b.Inicio), Fim: Horario.ParaBrasilia(b.Fim)));
+        ocupados.AddRange(bloqueios);
+
         return CalcularLivres(servico, prof, data, disponibilidade, ocupados);
     }
 
-    // versão em lote (busca do cliente): horários livres de vários serviços no mesmo dia, com 2 consultas no total.
+    // versão em lote (busca do cliente): horários livres de vários serviços no mesmo dia, com 3 consultas no total.
     // de/ate filtram pelo horário de início (ate exclusivo). Os serviços precisam vir com Profissional carregado.
     public async Task<Dictionary<int, List<DateTime>>> ObterHorariosLivres(
         IEnumerable<Servico> servicos, DateOnly data, TimeOnly? de = null, TimeOnly? ate = null)
@@ -64,14 +74,24 @@ public class AgendaService
         var inicioDia = Horario.ParaUtc(data.ToDateTime(TimeOnly.MinValue));
         var fimDia = Horario.ParaUtc(data.AddDays(1).ToDateTime(TimeOnly.MinValue));
 
-        var ocupados = (await _context.Agendamentos
+        var agendados = await _context.Agendamentos
                 .Where(a => profIds.Contains(a.ProfissionalId)
                          && a.Status != StatusAgendamento.Cancelado
                          && a.Status != StatusAgendamento.Recusado
                          && a.Inicio < fimDia
                          && a.Fim > inicioDia)
                 .Select(a => new { a.ProfissionalId, a.Inicio, a.Fim })
-                .ToListAsync())
+                .ToListAsync();
+
+        // bloqueios da profissional contam como horário ocupado
+        var bloqueios = await _context.BloqueiosAgenda
+                .Where(b => profIds.Contains(b.ProfissionalId)
+                         && b.Inicio < fimDia
+                         && b.Fim > inicioDia)
+                .Select(b => new { b.ProfissionalId, b.Inicio, b.Fim })
+                .ToListAsync();
+
+        var ocupados = agendados.Concat(bloqueios)
             .ToLookup(a => a.ProfissionalId, a => (Inicio: Horario.ParaBrasilia(a.Inicio), Fim: Horario.ParaBrasilia(a.Fim)));
 
         return lista.ToDictionary(

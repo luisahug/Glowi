@@ -1,21 +1,25 @@
 @page
 @model LogoutModel
 @{
-    ViewData["Title"] = "Log out";
+    ViewData["Title"] = "Sair";
 }
 
-<header>
-    <h1>@ViewData["Title"]</h1>
-    @{
-        if (User.Identity?.IsAuthenticated ?? false)
+<div class="card auth-card">
+    <div class="card-body text-center">
+        <img src="~/icons/icon-192.png" alt="Glowi" class="auth-logo mb-3" />
+        @if (User.Identity?.IsAuthenticated ?? false)
         {
-            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
-                <button type="submit" class="nav-link btn btn-link text-dark">Click here to Logout</button>
+            <h1 class="h3 mb-1">Sair da conta?</h1>
+            <p class="text-muted mb-4">Você precisará entrar de novo para ver seus agendamentos.</p>
+            <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                <button type="submit" class="w-100 btn btn-lg btn-glow">Sair</button>
             </form>
         }
         else
         {
-            <p>You have successfully logged out of the application.</p>
+            <h1 class="h3 mb-1">Até logo!</h1>
+            <p class="text-muted mb-4">Você saiu da sua conta.</p>
+            <a class="w-100 btn btn-lg btn-glow" asp-area="Identity" asp-page="/Account/Login">Entrar novamente</a>
         }
-    }
-</header>
+    </div>
+</div>

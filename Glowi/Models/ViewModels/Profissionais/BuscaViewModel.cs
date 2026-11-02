@@ -24,6 +24,9 @@ public class BuscaViewModel
     public Dictionary<int, DateTime> PrimeiroLivreServico { get; set; } = new();
     public Dictionary<int, DateTime> PrimeiroLivreProfissional { get; set; } = new();
 
+    // ProfissionalId das favoritas da cliente logada, para mostrar o coração
+    public HashSet<int> Favoritas { get; set; } = new();
+
     // tipos de profissional (Especialidade) disponíveis para filtrar
     public List<string> Tipos { get; set; } = new();
 

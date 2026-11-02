@@ -21,7 +21,8 @@ options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddErrorDescriber<Glowi.Services.IdentityErrosPtBr>();
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+    Glowi.Services.ValidacaoPtBr.Configurar(options.ModelBindingMessageProvider));
 
 builder.Services.AddScoped<Glowi.Services.AgendaService>();
 builder.Services.Configure<Glowi.Services.SupabaseStorageOptions>(

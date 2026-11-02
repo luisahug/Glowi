@@ -4,20 +4,37 @@
     ViewData["Title"] = Model.Usuario?.Nome;
     var nome = Model.Usuario?.Nome ?? "";
     var data = Context.Request.Query["data"].ToString();
+    var favorita = ViewData["Favorita"] as bool?;
+    var urlAtual = Context.Request.Path + Context.Request.QueryString;
 }
 
 <a asp-action="Index" class="link-back"><i class="bi bi-arrow-left"></i> Voltar</a>
 
+<partial name="_Alertas" />
+
 <div class="card bg-soft mb-4">
     <div class="card-body d-flex gap-3 align-items-center">
         <span class="avatar avatar-lg">@(nome.Length > 0 ? nome[..1] : "?")</span>
-        <div>
+        <div class="flex-grow-1">
             <h1 class="h3 mb-1">@nome</h1>
             @if (!string.IsNullOrWhiteSpace(Model.Especialidade))
             {
                 <p class="text-muted mb-0">@Model.Especialidade</p>
             }
         </div>
+        @* só para clientes: favoritar / desfavoritar *@
+        @if (favorita != null)
+        {
+            <form method="post" asp-controller="Favoritos" asp-action="@(favorita.Value ? "Desfavoritar" : "Favoritar")"
+                  asp-route-profissionalId="@Model.ProfissionalId" asp-route-returnUrl="@urlAtual">
+                <button type="submit" class="btn btn-icon @(favorita.Value ? "btn-danger" : "btn-outline-danger")"
+                        title="@(favorita.Value ? "Remover das favoritas" : "Adicionar às favoritas")"
+                        aria-label="@(favorita.Value ? "Remover das favoritas" : "Adicionar às favoritas")"
+                        aria-pressed="@(favorita.Value ? "true" : "false")">
+                    <i class="bi @(favorita.Value ? "bi-heart-fill" : "bi-heart")"></i>
+                </button>
+            </form>
+        }
     </div>
     @if (!string.IsNullOrWhiteSpace(Model.Biografia))
     {
