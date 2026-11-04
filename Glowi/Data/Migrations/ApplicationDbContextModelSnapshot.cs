@@ -255,8 +255,24 @@ namespace Glowi.Data.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(2);
 
+                    b.Property<string>("Bairro")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
                     b.Property<string>("Biografia")
                         .HasColumnType("text");
+
+                    b.Property<string>("Cep")
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.Property<string>("Cidade")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("Complemento")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
 
                     b.Property<string>("Especialidade")
                         .HasColumnType("text");
@@ -266,8 +282,26 @@ namespace Glowi.Data.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(15);
 
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Logradouro")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Numero")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
                     b.Property<string>("Telefone")
                         .HasColumnType("text");
+
+                    b.Property<string>("Uf")
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)");
 
                     b.Property<string>("UsuarioId")
                         .IsRequired()

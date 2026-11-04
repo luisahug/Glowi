@@ -21,6 +21,18 @@
             {
                 <p class="text-muted mb-0">@Model.Especialidade</p>
             }
+            @{
+                var distanciaKm = ViewData["DistanciaKm"] as double?;
+                var localTexto = string.Join(" · ", new[]
+                {
+                    distanciaKm is double km ? $"a {Glowi.Services.Distancia.Formatar(km)} de você" : null,
+                    Model.BairroCidade
+                }.Where(t => t != null));
+            }
+            @if (localTexto.Length > 0)
+            {
+                <p class="small mb-0 mt-1"><i class="bi bi-geo-alt me-1"></i>@localTexto</p>
+            }
         </div>
         @* só para clientes: favoritar / desfavoritar *@
         @if (favorita != null)

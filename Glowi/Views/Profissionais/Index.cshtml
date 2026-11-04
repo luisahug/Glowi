@@ -31,6 +31,23 @@
     </div>
 </div>
 
+<div class="local-bar mb-3" id="barraLocal">
+    <i class="bi bi-geo-alt-fill"></i>
+    <span class="flex-grow-1 min-w-0 text-truncate">
+        @if (Model.Local is { } local)
+        {
+            <text>Perto de <strong>@local.Rotulo</strong> · até @Model.RaioKm km</text>
+        }
+        else
+        {
+            <text>Informe onde você está para ver quem atende perto de você.</text>
+        }
+    </span>
+    <button type="button" class="btn btn-link btn-sm p-0 text-nowrap" data-bs-toggle="modal" data-bs-target="#modalLocal">
+        @(Model.Local == null ? "Definir local" : "Alterar")
+    </button>
+</div>
+
 <form method="get" asp-action="Index" role="search">
     @if (ver != null)
     {
@@ -97,6 +114,52 @@
     </div>
 </form>
 
+<div class="modal fade" id="modalLocal" tabindex="-1" aria-labelledby="modalLocalTitulo" aria-hidden="true"
+     data-local-lat="@Model.Local?.Latitude.ToString(inv)" data-local-lng="@Model.Local?.Longitude.ToString(inv)"
+     data-local-rotulo="@Model.Local?.Rotulo">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLocalTitulo"><i class="bi bi-geo-alt me-2"></i>Sua localização</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <button type="button" class="btn btn-outline-primary w-100 mb-3" data-local-gps>
+                    <i class="bi bi-crosshair me-1"></i>Usar minha localização atual
+                </button>
+
+                <label class="form-label small fw-semibold" for="localBusca">Ou digite CEP ou bairro e cidade</label>
+                <div class="input-group mb-2">
+                    <input type="search" class="form-control" id="localBusca" placeholder="Ex.: 80010-000 ou Batel, Curitiba" maxlength="120" autocomplete="postal-code" />
+                    <button type="button" class="btn btn-primary" data-local-buscar aria-label="Buscar local"><i class="bi bi-search"></i></button>
+                </div>
+                <p class="small mb-3" id="localStatus" role="status" aria-live="polite">
+                    @if (Model.Local is { } atual)
+                    {
+                        <span class="text-muted">Atual: <strong>@atual.Rotulo</strong></span>
+                    }
+                </p>
+
+                <label class="form-label small fw-semibold" for="localRaio">Mostrar profissionais em até</label>
+                <select class="form-select" id="localRaio">
+                    @foreach (var km in Glowi.Services.LocalizacaoCliente.OpcoesRaioKm)
+                    {
+                        <option value="@km" selected="@(km == Model.RaioKm)">@km km@(km == Glowi.Services.LocalizacaoCliente.RaioPadraoKm ? " (padrão)" : "")</option>
+                    }
+                </select>
+                <p class="small text-muted mt-2 mb-0">Profissionais que ainda não informaram o endereço aparecem no fim da lista.</p>
+            </div>
+            <div class="modal-footer">
+                @if (Model.Local != null)
+                {
+                    <button type="button" class="btn btn-link text-muted me-auto px-0" data-local-limpar>Não filtrar por distância</button>
+                }
+                <button type="button" class="btn btn-primary" data-local-aplicar>Aplicar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @if (filtros.Any())
 {
     <div class="chips mb-3" aria-label="Filtros aplicados">
@@ -128,8 +191,14 @@
         <p>
             @(Model.TemFiltro
                 ? "Nada encontrado com esses filtros. Tente outra palavra ou ajuste os filtros."
-                : "Nenhuma profissional disponível no momento.")
+                : Model.Local != null
+                    ? $"Nenhuma profissional em até {Model.RaioKm} km de você."
+                    : "Nenhuma profissional disponível no momento.")
         </p>
+        @if (Model.Local != null)
+        {
+            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalLocal">Aumentar a distância</button>
+        }
     </div>
 }
 else if (Model.VerServicos)
@@ -149,6 +218,10 @@ else if (Model.VerServicos)
                             @if (!string.IsNullOrWhiteSpace(p.Especialidade))
                             {
                                 <span>· @p.Especialidade</span>
+                            }
+                            @if (Model.DistanciaTexto(p.ProfissionalId) is { } distancia)
+                            {
+                                <span class="text-nowrap">· <i class="bi bi-geo-alt"></i> @distancia</span>
                             }
                         </div>
                     </div>
@@ -192,6 +265,16 @@ else
                             {
                                 <p class="card-text text-muted small mb-2">@p.Especialidade</p>
                             }
+                            @{
+                                var distanciaCard = Model.DistanciaTexto(p.ProfissionalId);
+                                var localCard = string.Join(" · ", new[] { distanciaCard, p.BairroCidade }.Where(t => t != null));
+                            }
+                            @if (localCard.Length > 0)
+                            {
+                                <p class="card-text small mb-2 @(Model.DistanciaKm.ContainsKey(p.ProfissionalId) ? "text-body" : "text-muted")">
+                                    <i class="bi bi-geo-alt me-1"></i>@localCard
+                                </p>
+                            }
                             <div class="d-flex flex-wrap gap-1 mb-2">
                                 @foreach (var s in servicos)
                                 {
@@ -219,6 +302,10 @@ else
 }
 
 @section Scripts {
+    <script src="~/js/localizacao.js" asp-append-version="true"></script>
+    <script>
+        GlowiLocal.iniciarBusca(document.getElementById('modalLocal'), { automatico: @(Model.Local == null ? "true" : "false") });
+    </script>
     <script>
         const campoData = document.getElementById('filtroData');
         const campoTurno = document.getElementById('filtroTurno');

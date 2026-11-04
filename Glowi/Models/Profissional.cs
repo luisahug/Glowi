@@ -8,10 +8,23 @@
         public string? Telefone { get; set; }
         public string? Especialidade { get; set; }
         public string? Biografia { get; set; }
-
-        // configurações da agenda (por enquanto fixas, mas no futuro serão editáveis pela profissional)
         public int IntervaloMinutos { get; set; } = 15;
         public int AntecedenciaMinimaHoras { get; set; } = 2;
+        public string? Cep { get; set; }
+        public string? Logradouro { get; set; }
+        public string? Numero { get; set; }
+        public string? Complemento { get; set; }
+        public string? Bairro { get; set; }
+        public string? Cidade { get; set; }
+        public string? Uf { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+
+        public bool TemLocalizacao => Latitude != null && Longitude != null;
+
+        public string? BairroCidade =>
+            string.Join(", ", new[] { Bairro, Cidade is null ? null : Uf is null ? Cidade : $"{Cidade}/{Uf}" }
+                .Where(s => !string.IsNullOrWhiteSpace(s))) is { Length: > 0 } texto ? texto : null;
 
         public ICollection<Servico> Servicos { get; set; } = new List<Servico>();
     }

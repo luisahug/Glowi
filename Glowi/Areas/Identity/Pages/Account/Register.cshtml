@@ -49,6 +49,9 @@
                     <label asp-for="Input.Biografia">Sobre você</label>
                     <span asp-validation-for="Input.Biografia" class="text-danger"></span>
                 </div>
+                <div class="mb-3">
+                    <partial name="_CamposEndereco" for="Input.Endereco" />
+                </div>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.Nome" class="form-control" autocomplete="name" aria-required="true" placeholder="Seu nome" />
@@ -87,6 +90,10 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/localizacao.js" asp-append-version="true"></script>
+    <script>
+        document.querySelectorAll('[data-endereco]').forEach(GlowiLocal.iniciarEndereco);
+    </script>
 
     <script>
         const tipos = document.querySelectorAll('input[name="Input.Tipo"]');

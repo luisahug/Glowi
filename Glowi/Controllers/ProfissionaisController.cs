@@ -55,8 +55,11 @@ namespace Glowi.Controllers
                 Turno = turno,
                 Hoje = hoje,
                 Maximo = maximo,
-                Favoritas = await FavoritasDoUsuario()
+                Favoritas = await FavoritasDoUsuario(),
+                Local = LocalizacaoCliente.Ler(Request),
+                RaioKm = LocalizacaoCliente.LerRaio(Request)
             };
+            var local = vm.Local;
 
             var especialidades = await _context.Profissionais
                 .Where(p => p.Servicos.Any() && p.Especialidade != null && p.Especialidade.Trim() != "")
@@ -86,10 +89,31 @@ namespace Glowi.Controllers
                         EF.Functions.ILike(s.Nome, padrao) ||
                         EF.Functions.ILike(s.Profissional!.Usuario!.Nome, padrao));
 
+                if (local != null)
+                {
+                    var (latMin, latMax, lngMin, lngMax) = local.Caixa();
+                    servicos = servicos.Where(s =>
+                        s.Profissional!.Latitude == null || s.Profissional.Longitude == null ||
+                        (s.Profissional.Latitude >= latMin && s.Profissional.Latitude <= latMax &&
+                         s.Profissional.Longitude >= lngMin && s.Profissional.Longitude <= lngMax));
+                }
+
                 vm.Servicos = await servicos
                     .OrderBy(s => s.Nome)
                     .ThenBy(s => s.Preco)
                     .ToListAsync();
+
+                if (local != null)
+                {
+                    CalcularDistancias(vm, local, vm.Servicos.Select(s => s.Profissional!));
+                    vm.Servicos = vm.Servicos
+                        .Where(s => DentroDoRaioOuSemLocal(vm, s.Profissional!))
+                        .OrderBy(s => s.Profissional!.TemLocalizacao ? 0 : 1)
+                        .ThenBy(s => s.Nome)
+                        .ThenBy(s => vm.DistanciaKm.GetValueOrDefault(s.Profissional!.ProfissionalId, double.MaxValue))
+                        .ThenBy(s => s.Preco)
+                        .ToList();
+                }
 
                 if (data is DateOnly dia)
                 {
@@ -116,9 +140,27 @@ namespace Glowi.Controllers
                         EF.Functions.ILike(p.Especialidade!, padrao) ||
                         p.Servicos.Any(s => EF.Functions.ILike(s.Nome, padrao)));
 
+                if (local != null)
+                {
+                    var (latMin, latMax, lngMin, lngMax) = local.Caixa();
+                    profissionais = profissionais.Where(p =>
+                        p.Latitude == null || p.Longitude == null ||
+                        (p.Latitude >= latMin && p.Latitude <= latMax && p.Longitude >= lngMin && p.Longitude <= lngMax));
+                }
+
                 vm.Profissionais = await profissionais
                     .OrderBy(p => p.Usuario!.Nome)
                     .ToListAsync();
+
+                if (local != null)
+                {
+                    CalcularDistancias(vm, local, vm.Profissionais);
+                    vm.Profissionais = vm.Profissionais
+                        .Where(p => DentroDoRaioOuSemLocal(vm, p))
+                        .OrderBy(p => vm.DistanciaKm.GetValueOrDefault(p.ProfissionalId, double.MaxValue))
+                        .ThenBy(p => p.Usuario!.Nome)
+                        .ToList();
+                }
 
                 if (data is DateOnly dia)
                 {
@@ -140,6 +182,15 @@ namespace Glowi.Controllers
 
             return View(vm);
         }
+        private static void CalcularDistancias(BuscaViewModel vm, LocalizacaoCliente local, IEnumerable<Profissional> profissionais)
+        {
+            foreach (var p in profissionais)
+                if (p.TemLocalizacao)
+                    vm.DistanciaKm[p.ProfissionalId] = local.DistanciaKm(p.Latitude!.Value, p.Longitude!.Value);
+        }
+        private static bool DentroDoRaioOuSemLocal(BuscaViewModel vm, Profissional p) =>
+            !vm.DistanciaKm.TryGetValue(p.ProfissionalId, out var km) || km <= vm.RaioKm;
+
         public async Task<IActionResult> Detalhes(int id)
         {
             var profissional = await _context.Profissionais
@@ -151,6 +202,9 @@ namespace Glowi.Controllers
             if (profissional == null)
                 return NotFound();
 
+            if (profissional.TemLocalizacao && LocalizacaoCliente.Ler(Request) is { } local)
+                ViewData["DistanciaKm"] = local.DistanciaKm(profissional.Latitude!.Value, profissional.Longitude!.Value);
+
             if (User.IsInRole("Cliente"))
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -160,8 +214,6 @@ namespace Glowi.Controllers
 
             return View(profissional);
         }
-
-        // ids das profissionais favoritas da cliente logada (vazio para profissionais)
         private async Task<HashSet<int>> FavoritasDoUsuario()
         {
             if (!User.IsInRole("Cliente"))

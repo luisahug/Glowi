@@ -37,6 +37,17 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Profissional>().Property(p => p.IntervaloMinutos).HasDefaultValue(15);
         builder.Entity<Profissional>().Property(p => p.AntecedenciaMinimaHoras).HasDefaultValue(2);
 
+        builder.Entity<Profissional>(p =>
+        {
+            p.Property(x => x.Cep).HasMaxLength(8);
+            p.Property(x => x.Logradouro).HasMaxLength(150);
+            p.Property(x => x.Numero).HasMaxLength(10);
+            p.Property(x => x.Complemento).HasMaxLength(60);
+            p.Property(x => x.Bairro).HasMaxLength(80);
+            p.Property(x => x.Cidade).HasMaxLength(80);
+            p.Property(x => x.Uf).HasMaxLength(2);
+        });
+
         builder.Entity<ServicoImagem>(i =>
         {
             i.HasOne(x => x.Servico).WithMany(s => s.Imagens).HasForeignKey(x => x.ServicoId).OnDelete(DeleteBehavior.Cascade);

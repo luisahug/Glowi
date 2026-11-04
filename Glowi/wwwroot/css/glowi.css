@@ -1306,3 +1306,32 @@ button.avatar {
         transition: none;
     }
 }
+
+/* Barra de localização da busca ("Perto de ... · até 15 km") */
+.local-bar {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .6rem .9rem;
+    border: 1px solid var(--glowi-border);
+    border-radius: var(--glowi-radius);
+    background: var(--glowi-gradient-soft);
+    font-size: .875rem;
+}
+
+    .local-bar > .bi {
+        color: var(--glowi-600);
+    }
+
+/* Campos de endereço da profissional (cadastro e perfil) */
+.endereco-campos {
+    padding: 1rem;
+    border: 1px dashed var(--glowi-200);
+    border-radius: var(--glowi-radius);
+    background: var(--glowi-50);
+}
+
+    .endereco-campos legend {
+        float: none;
+        width: auto;
+    }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,22 @@ builder.Services.AddScoped<Glowi.Services.AgendaService>();
 builder.Services.Configure<Glowi.Services.SupabaseStorageOptions>(
     builder.Configuration.GetSection(Glowi.Services.SupabaseStorageOptions.Secao));
 builder.Services.AddHttpClient<Glowi.Services.SupabaseStorageService>();
+
+// geolocalização (ViaCEP + Nominatim/OpenStreetMap). O Nominatim exige User-Agent identificando o app.
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient<Glowi.Services.GeolocalizacaoService>(http =>
+{
+    http.Timeout = TimeSpan.FromSeconds(8);
+    http.DefaultRequestHeaders.UserAgent.ParseAdd("Glowi/1.0 (agendamento de servicos de beleza)");
+});
+builder.Services.AddRateLimiter(opcoes =>
+{
+    opcoes.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    opcoes.AddPolicy(Glowi.Controllers.LocalizacaoController.PoliticaLimite, contexto =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            contexto.Connection.RemoteIpAddress?.ToString() ?? "desconhecido",
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = 30, Window = TimeSpan.FromMinutes(1) }));
+});
 
 var app = builder.Build();
 
@@ -65,6 +82,7 @@ else
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseRateLimiter();
 
 app.UseAuthorization();
 

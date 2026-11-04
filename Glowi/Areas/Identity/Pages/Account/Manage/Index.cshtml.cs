@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using Glowi.Data;
 using Glowi.Models;
+using Glowi.Models.ViewModels;
+using Glowi.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -13,12 +15,15 @@ public class IndexModel : PageModel
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly ApplicationDbContext _context;
+    private readonly GeolocalizacaoService _geo;
 
-    public IndexModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ApplicationDbContext context)
+    public IndexModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
+        ApplicationDbContext context, GeolocalizacaoService geo)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _context = context;
+        _geo = geo;
     }
 
     public string Email { get; set; } = string.Empty;
@@ -46,7 +51,11 @@ public class IndexModel : PageModel
 
         [Display(Name = "Sobre você")]
         public string? Biografia { get; set; }
+
+        public EnderecoInput Endereco { get; set; } = new();
     }
+
+    public bool SemLocalizacao { get; set; }
 
     public async Task<IActionResult> OnGetAsync()
     {
@@ -64,6 +73,9 @@ public class IndexModel : PageModel
             Input.Telefone = p?.Telefone;
             Input.Especialidade = p?.Especialidade;
             Input.Biografia = p?.Biografia;
+            if (p != null)
+                Input.Endereco = EnderecoInput.De(p);
+            SemLocalizacao = p?.TemLocalizacao != true;
         }
         else
         {
@@ -86,6 +98,10 @@ public class IndexModel : PageModel
         if (EhProfissional && string.IsNullOrWhiteSpace(Input.Especialidade))
             ModelState.AddModelError("Input.Especialidade", "Informe sua especialidade.");
 
+        if (!EhProfissional)
+            foreach (var chave in ModelState.Keys.Where(k => k.StartsWith("Input.Endereco.")).ToList())
+                ModelState.Remove(chave);
+
         if (!ModelState.IsValid)
             return Page();
 
@@ -98,6 +114,7 @@ public class IndexModel : PageModel
         }
 
         var telefone = string.IsNullOrWhiteSpace(Input.Telefone) ? null : Input.Telefone.Trim();
+        var localizada = true;
 
         if (EhProfissional)
         {
@@ -110,6 +127,7 @@ public class IndexModel : PageModel
             p.Telefone = telefone;
             p.Especialidade = Input.Especialidade?.Trim();
             p.Biografia = string.IsNullOrWhiteSpace(Input.Biografia) ? null : Input.Biografia.Trim();
+            localizada = await _geo.AplicarEnderecoAsync(p, Input.Endereco);
         }
         else
         {
@@ -125,7 +143,9 @@ public class IndexModel : PageModel
         await _context.SaveChangesAsync();
         await _signInManager.RefreshSignInAsync(user);
 
-        StatusMessage = "Perfil atualizado.";
+        StatusMessage = localizada
+            ? "Perfil atualizado."
+            : "Perfil atualizado, mas não encontramos seu endereço no mapa. Confira o CEP e o número ou use sua localização atual.";
         return RedirectToPage();
     }
 }

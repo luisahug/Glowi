@@ -45,6 +45,17 @@
             <label asp-for="Input.Biografia"></label>
             <span asp-validation-for="Input.Biografia" class="text-danger"></span>
         </div>
+
+        @if (Model.SemLocalizacao && Model.Input.Endereco.Vazio)
+        {
+            <div class="alert alert-warning small d-flex gap-2" role="alert">
+                <i class="bi bi-geo-alt"></i>
+                <span>Cadastre seu endereço para aparecer nas buscas de clientes perto de você. Sem ele, você aparece no fim da lista.</span>
+            </div>
+        }
+        <div class="mb-4">
+            <partial name="_CamposEndereco" for="Input.Endereco" />
+        </div>
     }
 
     <button id="update-profile-button" type="submit" class="btn btn-primary">Salvar</button>
@@ -52,4 +63,8 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/localizacao.js" asp-append-version="true"></script>
+    <script>
+        document.querySelectorAll('[data-endereco]').forEach(GlowiLocal.iniciarEndereco);
+    </script>
 }

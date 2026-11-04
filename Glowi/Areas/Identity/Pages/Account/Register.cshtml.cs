@@ -3,6 +3,8 @@
 
 using Glowi.Data;
 using Glowi.Models;
+using Glowi.Models.ViewModels;
+using Glowi.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -30,6 +32,7 @@ public class RegisterModel : PageModel
     private readonly IUserEmailStore<ApplicationUser> _emailStore;
     private readonly ILogger<RegisterModel> _logger;
     private readonly ApplicationDbContext _context;
+    private readonly GeolocalizacaoService _geo;
 
     public RegisterModel(
         UserManager<ApplicationUser> userManager,
@@ -37,7 +40,8 @@ public class RegisterModel : PageModel
         SignInManager<ApplicationUser> signInManager,
         ILogger<RegisterModel> logger,
         IEmailSender emailSender,
-        ApplicationDbContext context)
+        ApplicationDbContext context,
+        GeolocalizacaoService geo)
     {
         _userManager = userManager;
         _userStore = userStore;
@@ -45,6 +49,7 @@ public class RegisterModel : PageModel
         _signInManager = signInManager;
         _logger = logger;
         _context = context;
+        _geo = geo;
     }
 
     /// <summary>
@@ -117,6 +122,7 @@ public class RegisterModel : PageModel
 
         [Display(Name = "Sobre você")]
         public string? Biografia { get; set; }
+        public EnderecoInput Endereco { get; set; } = new();
     }
 
 
@@ -129,14 +135,18 @@ public class RegisterModel : PageModel
     public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
     {
         returnUrl ??= Url.Content("~/");
-        ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-
-        // valida antes de criar o usuário, para não sobrar conta sem perfil
-        if (Input.Tipo != "Cliente" && Input.Tipo != "Profissional")
+        ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();        if (Input.Tipo != "Cliente" && Input.Tipo != "Profissional")
             ModelState.AddModelError("Input.Tipo", "Escolha se você é cliente ou profissional.");
 
         if (Input.Tipo == "Profissional" && string.IsNullOrWhiteSpace(Input.Especialidade))
             ModelState.AddModelError("Input.Especialidade", "Informe sua especialidade.");
+
+        if (Input.Tipo != "Profissional")
+        {
+            foreach (var chave in ModelState.Keys.Where(k => k.StartsWith("Input.Endereco.")).ToList())
+                ModelState.Remove(chave);
+            Input.Endereco = new();
+        }
 
         if (ModelState.IsValid)
         {
@@ -172,13 +182,15 @@ public class RegisterModel : PageModel
                 }
                 else
                 {
-                    _context.Profissionais.Add(new Profissional
+                    var profissional = new Profissional
                     {
                         UsuarioId = user.Id,
                         Telefone = Input.Telefone,
                         Especialidade = Input.Especialidade,
                         Biografia = Input.Biografia
-                    });
+                    };
+                    await _geo.AplicarEnderecoAsync(profissional, Input.Endereco);
+                    _context.Profissionais.Add(profissional);
                 }
 
                 await _context.SaveChangesAsync();

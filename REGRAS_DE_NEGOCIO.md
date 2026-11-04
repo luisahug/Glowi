@@ -9,7 +9,7 @@ Todos os horários do sistema seguem o **horário de Brasília**.
 - No cadastro, cada pessoa escolhe se é **Cliente** ou **Profissional**. O perfil não muda depois.
 - O email é único e serve de login.
 - A senha precisa ter no mínimo 6 caracteres, com letra maiúscula, letra minúscula, número e símbolo.
-- A profissional precisa informar sua **especialidade**. Telefone e biografia são opcionais.
+- A profissional precisa informar sua **especialidade**. Telefone, biografia e endereço são opcionais (o endereço é recomendado, ver seção 8).
 - Uma conta com agendamentos registrados **não pode ser excluída**, para não apagar o histórico da outra parte.
 
 ## 2. Serviços
@@ -87,3 +87,28 @@ O agendamento guarda o preço do serviço **no momento da reserva**. Esse valor 
 - Agendamentos já marcados no período **não são cancelados automaticamente**. O sistema avisa a profissional de quantos existem, e ela decide se recusa os pendentes ou combina com a cliente.
 - O motivo do bloqueio é opcional (até 120 caracteres) e **só a profissional vê**.
 - Quando a profissional remove um bloqueio, os horários voltam a ficar livres. Bloqueios que já terminaram saem da lista.
+
+## 8. Localização e busca por distância
+
+### 8.1 Endereço da profissional
+
+- A profissional pode informar o **endereço de atendimento** no cadastro ou depois, no perfil. É **opcional, mas recomendado**.
+- Ao digitar o CEP, rua, bairro, cidade e UF são preenchidos automaticamente (ViaCEP). Ela confere e informa o número.
+- Também pode usar o botão **"Usar minha localização atual"**, que pega a posição do GPS do aparelho e preenche o endereço.
+- O sistema converte o endereço em coordenadas (OpenStreetMap). Se não encontrar o endereço no mapa, salva assim mesmo e avisa no perfil para conferir o CEP e o número ou usar a localização atual.
+- As clientes veem **só o bairro e a cidade** da profissional, nunca o endereço completo.
+
+### 8.2 Localização da cliente
+
+- Na primeira vez que abre a busca, o navegador pede permissão para usar a localização. Se ela aceitar, a busca já passa a considerar onde ela está.
+- A cliente pode trocar o local quando quiser: pelo GPS ou digitando um CEP ou "bairro, cidade".
+- O raio padrão é de **15 km**. Ela pode escolher 5, 10, 15, 25, 50 ou 100 km.
+- O local e o raio ficam salvos **no navegador** (cookie), valem também sem login e só naquele aparelho.
+- Ela pode desligar o filtro com "Não filtrar por distância". Aí a busca volta a mostrar todas as profissionais.
+
+### 8.3 Resultado da busca
+
+- Com a localização definida, aparecem só as profissionais **dentro do raio**, da mais perto para a mais longe, com a distância em cada card.
+- Profissionais que **não informaram endereço** continuam aparecendo, **no fim da lista**, marcadas como "distância não informada".
+- A distância é em linha reta (não é o trajeto de carro ou a pé).
+- Os outros filtros (tipo de profissional, texto, data e turno) continuam valendo junto com a distância.

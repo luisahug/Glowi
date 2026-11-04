@@ -1,0 +1,79 @@
+@model Glowi.Models.ViewModels.EnderecoInput
+@* Campos de endereço da profissional. Use com <partial name="_CamposEndereco" for="Input.Endereco" />
+   e carregue ~/js/localizacao.js chamando GlowiLocal.iniciarEndereco(elemento). *@
+
+<fieldset class="endereco-campos" data-endereco>
+    <legend class="form-label fw-semibold small mb-1">
+        Endereço de atendimento <span class="badge badge-soft-primary ms-1">Recomendado</span>
+    </legend>
+    <p class="small text-muted mb-3">
+        Opcional, mas sem ele você aparece no fim das buscas por proximidade.
+        As clientes veem só o bairro e a cidade.
+    </p>
+
+    <button type="button" class="btn btn-outline-primary btn-sm mb-3" data-endereco-gps>
+        <i class="bi bi-crosshair me-1"></i>Usar minha localização atual
+    </button>
+
+    <div class="row g-2">
+        <div class="col-7 col-sm-5">
+            <div class="form-floating">
+                <input asp-for="Cep" class="form-control" inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" data-endereco-cep />
+                <label asp-for="Cep"></label>
+            </div>
+        </div>
+        <div class="col-5 col-sm-3">
+            <div class="form-floating">
+                <input asp-for="Numero" class="form-control" placeholder="Nº" data-endereco-campo="numero" />
+                <label asp-for="Numero"></label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="form-floating">
+                <input asp-for="Complemento" class="form-control" placeholder="Sala, apto..." />
+                <label asp-for="Complemento"></label>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="form-floating">
+                <input asp-for="Logradouro" class="form-control" autocomplete="address-line1" placeholder="Rua" data-endereco-campo="logradouro" />
+                <label asp-for="Logradouro"></label>
+            </div>
+        </div>
+        <div class="col-12 col-sm-5">
+            <div class="form-floating">
+                <input asp-for="Bairro" class="form-control" placeholder="Bairro" data-endereco-campo="bairro" />
+                <label asp-for="Bairro"></label>
+            </div>
+        </div>
+        <div class="col-8 col-sm-5">
+            <div class="form-floating">
+                <input asp-for="Cidade" class="form-control" autocomplete="address-level2" placeholder="Cidade" data-endereco-campo="cidade" />
+                <label asp-for="Cidade"></label>
+            </div>
+        </div>
+        <div class="col-4 col-sm-2">
+            <div class="form-floating">
+                <input asp-for="Uf" class="form-control text-uppercase" autocomplete="address-level1" maxlength="2" placeholder="UF" data-endereco-campo="uf" />
+                <label asp-for="Uf"></label>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" asp-for="Latitude" data-endereco-lat />
+    <input type="hidden" asp-for="Longitude" data-endereco-lng />
+
+    <div class="small mt-2" data-endereco-status role="status" aria-live="polite">
+        @if (Model?.SemCoordenadas == true)
+        {
+            <span class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i>Não encontramos seu endereço no mapa. Confira o CEP e o número ou use sua localização atual.</span>
+        }
+    </div>
+    <span asp-validation-for="Cep" class="text-danger small d-block"></span>
+    <span asp-validation-for="Numero" class="text-danger small d-block"></span>
+    <span asp-validation-for="Uf" class="text-danger small d-block"></span>
+    <span asp-validation-for="Logradouro" class="text-danger small d-block"></span>
+    <span asp-validation-for="Bairro" class="text-danger small d-block"></span>
+    <span asp-validation-for="Cidade" class="text-danger small d-block"></span>
+    <span asp-validation-for="Complemento" class="text-danger small d-block"></span>
+</fieldset>
