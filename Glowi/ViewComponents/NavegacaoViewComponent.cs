@@ -33,6 +33,15 @@ public class NavegacaoViewComponent : ViewComponent
                               && a.Status == StatusAgendamento.Pendente
                               && a.Fim > agora);
         }
+        else if (usuario.IsInRole("Cliente"))
+        {
+            // avisos de cancelamento por bloqueio que o cliente ainda não viu
+            var userId = usuario.FindFirstValue(ClaimTypes.NameIdentifier);
+            pendentes = await _context.Agendamentos
+                .CountAsync(a => a.Cliente!.UsuarioId == userId
+                              && a.CanceladoPorBloqueio
+                              && !a.ClienteViuCancelamento);
+        }
 
         return View((Itens: itens, Ativo: ativo, Pendentes: pendentes));
     }

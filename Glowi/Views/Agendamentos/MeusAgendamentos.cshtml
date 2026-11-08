@@ -13,7 +13,7 @@
     {
         Id = "modalCancelar",
         Titulo = "Cancelar agendamento?",
-        Texto = "O horário será liberado para outras clientes. Essa ação não pode ser desfeita.",
+        Texto = "O horário será liberado para outros(as) clientes. Essa ação não pode ser desfeita.",
         Icone = "bi-calendar-x",
         Manter = "Manter",
         Confirmar = "Sim, cancelar"
@@ -29,6 +29,31 @@
 </div>
 
 <partial name="_Alertas" />
+
+@if (Model.AvisosCancelamento.Any())
+{
+    var varios = Model.AvisosCancelamento.Count > 1;
+
+    <div class="alert alert-warning alert-dismissible fade show d-flex gap-2" role="alert">
+        <i class="bi bi-calendar-x-fill"></i>
+        <div>
+            <div class="fw-semibold">
+                @(varios ? "Alguns agendamentos foram cancelados pelo(a) profissional" : "Um agendamento foi cancelado pelo(a) profissional")
+            </div>
+            <div class="small mb-1">O(a) profissional não vai atender @(varios ? "nesses horários" : "nesse horário"). Você pode agendar outro horário quando quiser.</div>
+            <ul class="mb-0 small">
+                @foreach (var a in Model.AvisosCancelamento)
+                {
+                    <li>
+                        @a.Servico?.Nome com @a.Profissional?.Usuario?.Nome ·
+                        @Horario.ParaBrasilia(a.Inicio).ToString("dddd, dd/MM 'às' HH:mm")
+                    </li>
+                }
+            </ul>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+}
 
 @if (!Model.Proximos.Any())
 {

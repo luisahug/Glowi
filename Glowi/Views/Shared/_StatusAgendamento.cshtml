@@ -5,6 +5,7 @@
     {
         StatusAgendamento.Pendente => ("Pendente", "badge-soft-warning"),
         StatusAgendamento.Confirmado => ("Confirmado", "badge-soft-success"),
+        _ when Model.CanceladoPorBloqueio => ("Cancelado pelo(a) profissional", "badge-soft-danger"),
         StatusAgendamento.Cancelado => ("Cancelado", "badge-soft-secondary"),
         StatusAgendamento.Recusado => ("Recusado", "badge-soft-danger"),
         _ => (Model.Status.ToString(), "badge-soft-secondary")

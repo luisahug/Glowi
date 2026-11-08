@@ -30,8 +30,14 @@ namespace Glowi.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AgendamentoId"));
 
+                    b.Property<bool>("CanceladoPorBloqueio")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("ClienteId")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("ClienteViuCancelamento")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("CriadoEm")
                         .HasColumnType("timestamp with time zone");

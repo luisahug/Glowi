@@ -28,8 +28,8 @@ public static class Menu
         if (user.IsInRole("Cliente"))
         {
             itens.Add(new("Profissionais", "Index", "bi-search-heart", "", "Agendar", "Agendar", "Encontre profissionais e serviços", new[] { "Profissionais", "Agendamentos" }));
-            itens.Add(new("Agendamentos", "MeusAgendamentos", "bi-calendar-check", "icon-box-pink", "Meus agendamentos", "Agendamentos", "Acompanhe seus horários marcados", new[] { "Agendamentos/MeusAgendamentos" }));
-            itens.Add(new("Favoritos", "Index", "bi-heart", "icon-box-amber", "Minhas favoritas", "Favoritas", "Suas profissionais preferidas", new[] { "Favoritos" }));
+            itens.Add(new("Agendamentos", "MeusAgendamentos", "bi-calendar-check", "icon-box-pink", "Meus agendamentos", "Agendamentos", "Acompanhe seus horários marcados", new[] { "Agendamentos/MeusAgendamentos" }) { Pendentes = true });
+            itens.Add(new("Favoritos", "Index", "bi-heart", "icon-box-amber", "Profissionais favoritos(as)", "Favoritos(as)", "Seus(suas) profissionais preferidos(as)", new[] { "Favoritos" }));
         }
 
         return itens;

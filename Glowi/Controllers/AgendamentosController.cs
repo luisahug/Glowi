@@ -132,8 +132,19 @@ public class AgendamentosController : Controller
             Historico = agendamentos
                 .Where(a => !ativos.Contains(a.Status) || a.Fim <= agora)
                 .OrderByDescending(a => a.Inicio)
+                .ToList(),
+            AvisosCancelamento = agendamentos
+                .Where(a => a.CanceladoPorBloqueio && !a.ClienteViuCancelamento)
+                .OrderBy(a => a.Inicio)
                 .ToList()
         };
+
+        // o aviso aparece uma vez: ao abrir a página, conta como visto
+        if (vm.AvisosCancelamento.Count > 0)
+        {
+            vm.AvisosCancelamento.ForEach(a => a.ClienteViuCancelamento = true);
+            await _context.SaveChangesAsync();
+        }
 
         return View(vm);
     }

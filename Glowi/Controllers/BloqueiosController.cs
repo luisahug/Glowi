@@ -1,6 +1,7 @@
 using Glowi.Data;
 using Glowi.Models;
 using Glowi.Models.Enum;
+using Glowi.Models.ViewModels;
 using Glowi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -50,7 +51,9 @@ public class BloqueiosController : Controller
     // senão: de dataInicio horaInicio até dataFim horaFim.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(DateOnly? dataInicio, DateOnly? dataFim, TimeOnly? horaInicio, TimeOnly? horaFim, bool diaInteiro, string? motivo)
+    // se já houver agendamentos no período, mostra um aviso antes de bloquear.
+    // a profissional confirma reenviando com cancelarAgendamentos=true: pendentes viram Recusado e confirmados viram Cancelado.
+    public async Task<IActionResult> Create(DateOnly? dataInicio, DateOnly? dataFim, TimeOnly? horaInicio, TimeOnly? horaFim, bool diaInteiro, string? motivo, bool cancelarAgendamentos)
     {
         motivo = string.IsNullOrWhiteSpace(motivo) ? null : motivo.Trim();
 
@@ -93,6 +96,42 @@ public class BloqueiosController : Controller
             return RedirectToAction(nameof(Index));
         }
 
+        // agendamentos em aberto (ainda não começaram) que caem no período
+        var agora = DateTime.UtcNow;
+        var agendamentosNoPeriodo = await _context.Agendamentos
+            .Include(a => a.Servico)
+            .Include(a => a.Cliente).ThenInclude(c => c!.Usuario)
+            .Where(a => a.ProfissionalId == profissionalId
+                     && (a.Status == StatusAgendamento.Pendente || a.Status == StatusAgendamento.Confirmado)
+                     && a.Inicio > agora
+                     && a.Inicio < fim && inicio < a.Fim)
+            .OrderBy(a => a.Inicio)
+            .ToListAsync();
+
+        if (agendamentosNoPeriodo.Count > 0 && !cancelarAgendamentos)
+        {
+            return View("ConfirmarBloqueio", new ConfirmarBloqueioViewModel
+            {
+                DataInicio = dataInicio.Value,
+                DataFim = fimData,
+                HoraInicio = horaInicio,
+                HoraFim = horaFim,
+                DiaInteiro = diaInteiro,
+                Motivo = motivo,
+                Agendamentos = agendamentosNoPeriodo
+            });
+        }
+
+        // o cliente é avisado em "Meus agendamentos" (CanceladoPorBloqueio && !ClienteViuCancelamento)
+        foreach (var agendamento in agendamentosNoPeriodo)
+        {
+            agendamento.Status = agendamento.Status == StatusAgendamento.Pendente
+                ? StatusAgendamento.Recusado
+                : StatusAgendamento.Cancelado;
+            agendamento.CanceladoPorBloqueio = true;
+            agendamento.ClienteViuCancelamento = false;
+        }
+
         _context.BloqueiosAgenda.Add(new BloqueioAgenda
         {
             ProfissionalId = profissionalId,
@@ -102,15 +141,9 @@ public class BloqueiosController : Controller
         });
         await _context.SaveChangesAsync();
 
-        // agendamentos já marcados no período não são cancelados automaticamente
-        var agendamentosNoPeriodo = await _context.Agendamentos.CountAsync(a =>
-            a.ProfissionalId == profissionalId
-            && (a.Status == StatusAgendamento.Pendente || a.Status == StatusAgendamento.Confirmado)
-            && a.Inicio < fim && inicio < a.Fim);
-
-        TempData["Sucesso"] = agendamentosNoPeriodo == 0
-            ? "Período bloqueado. As clientes não verão horários livres nele."
-            : $"Período bloqueado. Atenção: você já tem {agendamentosNoPeriodo} agendamento(s) nesse período, que continuam marcados.";
+        TempData["Sucesso"] = agendamentosNoPeriodo.Count == 0
+            ? "Período bloqueado. Os(as) clientes não verão horários livres nele."
+            : $"Período bloqueado e {agendamentosNoPeriodo.Count} agendamento(s) cancelado(s). Os(as) clientes foram avisados(as) no app.";
 
         return RedirectToAction(nameof(Index));
     }

@@ -6,4 +6,7 @@ public class MeusAgendamentosViewModel
     public List<Models.Agendamento> Pendentes { get; set; } = new();
     public List<Models.Agendamento> Proximos { get; set; } = new();
     public List<Models.Agendamento> Historico { get; set; } = new();
+
+    // só usado na tela do cliente: cancelados por bloqueio da profissional que o cliente ainda não tinha visto
+    public List<Models.Agendamento> AvisosCancelamento { get; set; } = new();
 }

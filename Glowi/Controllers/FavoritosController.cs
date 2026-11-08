@@ -65,7 +65,7 @@ public class FavoritosController : Controller
             }
         }
 
-        TempData["Sucesso"] = "Adicionada às suas favoritas.";
+        TempData["Sucesso"] = "Profissional adicionado(a) aos favoritos.";
         return Voltar(returnUrl);
     }
 
@@ -84,7 +84,7 @@ public class FavoritosController : Controller
             await _context.SaveChangesAsync();
         }
 
-        TempData["Sucesso"] = "Removida das suas favoritas.";
+        TempData["Sucesso"] = "Profissional removido(a) dos favoritos.";
         return Voltar(returnUrl);
     }
 

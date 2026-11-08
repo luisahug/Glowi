@@ -1,0 +1,73 @@
+@model Glowi.Models.ViewModels.ConfirmarBloqueioViewModel
+@using Glowi.Services
+@{
+    ViewData["Title"] = "Agendamentos no período";
+
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    var total = Model.Agendamentos.Count;
+
+    var periodo = Model.DiaInteiro
+        ? (Model.DataInicio == Model.DataFim
+            ? $"{Model.DataInicio:dddd, dd/MM} · dia inteiro"
+            : $"{Model.DataInicio:dd/MM} a {Model.DataFim:dd/MM} · dias inteiros")
+        : (Model.DataInicio == Model.DataFim
+            ? $"{Model.DataInicio:dddd, dd/MM} · {Model.HoraInicio:HH:mm} – {Model.HoraFim:HH:mm}"
+            : $"{Model.DataInicio:dd/MM} às {Model.HoraInicio:HH:mm} até {Model.DataFim:dd/MM} às {Model.HoraFim:HH:mm}");
+}
+
+<a asp-action="Index" class="link-back"><i class="bi bi-arrow-left"></i> Bloqueios de agenda</a>
+
+<div class="page-header">
+    <h1>Você tem agendamentos nesse período</h1>
+    <p>
+        Você está bloqueando <strong>@periodo</strong>, mas já existe@(total == 1 ? "" : "m")
+        <strong>@total agendamento@(total == 1 ? "" : "s")</strong> marcado@(total == 1 ? "" : "s") nele.
+        Se confirmar, @(total == 1 ? "ele será cancelado" : "eles serão cancelados"), o horário fica bloqueado
+        e @(total == 1 ? "o(a) cliente recebe" : "os(as) clientes recebem") um aviso no app. Se voltar, nada muda.
+    </p>
+</div>
+
+<div class="list-group mb-4">
+    @foreach (var a in Model.Agendamentos)
+    {
+        var inicio = Horario.ParaBrasilia(a.Inicio);
+        var fim = Horario.ParaBrasilia(a.Fim);
+        var nomeCliente = a.Cliente?.Usuario?.Nome;
+        var linkWhatsApp = WhatsApp.Link(a.Cliente?.Telefone,
+            $"Olá, {nomeCliente}! Aqui é do Glowi, sobre seu agendamento de {a.Servico?.Nome} em {inicio:dd/MM 'às' HH:mm}.");
+
+        <div class="list-group-item py-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                <div>
+                    <div class="fw-semibold">@nomeCliente</div>
+                    <div>@a.Servico?.Nome · <span class="price">@a.Preco.ToString("C")</span></div>
+                    <div><i class="bi bi-calendar3 text-muted me-1"></i>@inicio.ToString("dddd, dd/MM 'às' HH:mm") – @fim.ToString("HH:mm")</div>
+                    <div class="mt-2"><partial name="_StatusAgendamento" model="a" /></div>
+                </div>
+
+                @if (linkWhatsApp != null)
+                {
+                    <a class="btn btn-sm btn-outline-secondary" href="@linkWhatsApp" target="_blank" rel="noopener"><i class="bi bi-whatsapp text-success"></i> Mensagem</a>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<form method="post" asp-action="Create" class="d-flex flex-wrap justify-content-end gap-2">
+    <input type="hidden" name="dataInicio" value="@Model.DataInicio.ToString("yyyy-MM-dd", inv)" />
+    <input type="hidden" name="dataFim" value="@Model.DataFim.ToString("yyyy-MM-dd", inv)" />
+    @if (!Model.DiaInteiro)
+    {
+        <input type="hidden" name="horaInicio" value="@Model.HoraInicio?.ToString("HH:mm", inv)" />
+        <input type="hidden" name="horaFim" value="@Model.HoraFim?.ToString("HH:mm", inv)" />
+    }
+    <input type="hidden" name="diaInteiro" value="@(Model.DiaInteiro ? "true" : "false")" />
+    <input type="hidden" name="motivo" value="@Model.Motivo" />
+    <input type="hidden" name="cancelarAgendamentos" value="true" />
+
+    <a asp-action="Index" class="btn btn-secondary">Voltar sem bloquear</a>
+    <button type="submit" class="btn btn-danger">
+        <i class="bi bi-calendar-x"></i> Confirmar: bloquear e cancelar @(total == 1 ? "o agendamento" : $"os {total} agendamentos")
+    </button>
+</form>

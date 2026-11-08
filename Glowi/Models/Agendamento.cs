@@ -24,6 +24,12 @@ public class Agendamento
     public StatusAgendamento Status { get; set; } = StatusAgendamento.Pendente;
     public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
 
+    // a profissional bloqueou a agenda no horário e cancelou este agendamento (pendente vira Recusado, confirmado vira Cancelado)
+    public bool CanceladoPorBloqueio { get; set; }
+
+    // o cliente já viu o aviso do cancelamento por bloqueio em "Meus agendamentos"
+    public bool ClienteViuCancelamento { get; set; }
+
     // não é coluna no banco: concluído = confirmado e o horário já passou
     public bool Concluido => Status == StatusAgendamento.Confirmado && Fim <= DateTime.UtcNow;
 

@@ -178,7 +178,7 @@
         <span>
             @Model.Total @(Model.VerServicos
                 ? (Model.Total == 1 ? "serviço encontrado" : "serviços encontrados")
-                : (Model.Total == 1 ? "profissional encontrada" : "profissionais encontradas"))
+                : (Model.Total == 1 ? "profissional encontrado(a)" : "profissionais encontrados(as)"))
         </span>
         <a class="btn btn-link btn-sm p-0" asp-action="Index" asp-route-ver="@ver">Limpar tudo</a>
     </div>
@@ -192,8 +192,8 @@
             @(Model.TemFiltro
                 ? "Nada encontrado com esses filtros. Tente outra palavra ou ajuste os filtros."
                 : Model.Local != null
-                    ? $"Nenhuma profissional em até {Model.RaioKm} km de você."
-                    : "Nenhuma profissional disponível no momento.")
+                    ? $"Nenhum(a) profissional em até {Model.RaioKm} km de você."
+                    : "Nenhum(a) profissional disponível no momento.")
         </p>
         @if (Model.Local != null)
         {

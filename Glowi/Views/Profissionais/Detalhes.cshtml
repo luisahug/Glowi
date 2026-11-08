@@ -40,8 +40,8 @@
             <form method="post" asp-controller="Favoritos" asp-action="@(favorita.Value ? "Desfavoritar" : "Favoritar")"
                   asp-route-profissionalId="@Model.ProfissionalId" asp-route-returnUrl="@urlAtual">
                 <button type="submit" class="btn btn-icon @(favorita.Value ? "btn-danger" : "btn-outline-danger")"
-                        title="@(favorita.Value ? "Remover das favoritas" : "Adicionar às favoritas")"
-                        aria-label="@(favorita.Value ? "Remover das favoritas" : "Adicionar às favoritas")"
+                        title="@(favorita.Value ? "Remover dos favoritos" : "Adicionar aos favoritos")"
+                        aria-label="@(favorita.Value ? "Remover dos favoritos" : "Adicionar aos favoritos")"
                         aria-pressed="@(favorita.Value ? "true" : "false")">
                     <i class="bi @(favorita.Value ? "bi-heart-fill" : "bi-heart")"></i>
                 </button>

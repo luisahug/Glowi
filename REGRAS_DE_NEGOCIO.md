@@ -84,7 +84,12 @@ O agendamento guarda o preço do serviço **no momento da reserva**. Esse valor 
 - O fim precisa ser depois do início, o período não pode ter terminado e o início pode estar no máximo **1 ano à frente**.
 - Bloqueios da mesma profissional não podem se sobrepor.
 - Enquanto o bloqueio existe, as clientes não veem horários livres no período.
-- Agendamentos já marcados no período **não são cancelados automaticamente**. O sistema avisa a profissional de quantos existem, e ela decide se recusa os pendentes ou combina com a cliente.
+- Se já houver agendamentos **pendentes ou confirmados** (que ainda não começaram) no período, o bloqueio **não é criado direto**. O sistema mostra a lista desses agendamentos e a profissional escolhe:
+  - **Voltar sem bloquear**: nada muda.
+  - **Confirmar**: o bloqueio é criado, os pedidos pendentes viram **Recusado** e os confirmados viram **Cancelado**, marcados como **cancelados pela profissional**.
+- O cliente é avisado no app: o menu "Meus agendamentos" mostra um contador e, ao abrir a página, aparece um alerta com os agendamentos cancelados. O alerta aparece **uma vez** (ao abrir a página, conta como visto). No histórico, o agendamento fica com o selo "Cancelado pela profissional".
+- A tela de confirmação também mostra o WhatsApp de cada cliente, caso a profissional queira falar com ela antes.
+- Agendamentos que já começaram não são cancelados pelo bloqueio.
 - O motivo do bloqueio é opcional (até 120 caracteres) e **só a profissional vê**.
 - Quando a profissional remove um bloqueio, os horários voltam a ficar livres. Bloqueios que já terminaram saem da lista.
 

@@ -1,12 +1,12 @@
 @model List<Glowi.Models.Profissional>
 @{
-    ViewData["Title"] = "Minhas favoritas";
+    ViewData["Title"] = "Profissionais favoritos(as)";
 }
 
 <div class="page-header d-flex flex-wrap justify-content-between align-items-end gap-2">
     <div>
-        <h1>Minhas favoritas</h1>
-        <p>Suas profissionais preferidas, à mão para agendar de novo.</p>
+        <h1>Profissionais favoritos(as)</h1>
+        <p>Seus(suas) profissionais preferidos(as), à mão para agendar de novo.</p>
     </div>
     <a class="btn btn-primary" asp-controller="Profissionais" asp-action="Index"><i class="bi bi-search-heart"></i> Encontrar profissionais</a>
 </div>
@@ -17,7 +17,7 @@
 {
     <div class="empty-state">
         <span class="icon-box icon-box-pink"><i class="bi bi-heart"></i></span>
-        <p>Você ainda não tem favoritas. Toque no <i class="bi bi-heart"></i> no perfil de uma profissional para guardá-la aqui.</p>
+        <p>Você ainda não tem favoritos(as). Toque no <i class="bi bi-heart"></i> no perfil de um(a) profissional para guardá-lo(a) aqui.</p>
         <a class="btn btn-sm btn-outline-primary mt-3" asp-controller="Profissionais" asp-action="Index">Ver profissionais</a>
     </div>
 }
@@ -63,7 +63,7 @@ else
                     </div>
                     <div class="card-footer bg-transparent d-flex justify-content-between align-items-center gap-2">
                         <form method="post" asp-action="Desfavoritar" asp-route-profissionalId="@p.ProfissionalId">
-                            <button type="submit" class="btn btn-sm btn-link text-danger px-0" title="Remover das favoritas">
+                            <button type="submit" class="btn btn-sm btn-link text-danger px-0" title="Remover dos favoritos">
                                 <i class="bi bi-heart-fill me-1"></i>Remover
                             </button>
                         </form>
