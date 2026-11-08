@@ -7,7 +7,6 @@
     var agora = Horario.Agora;
     var hoje = DateOnly.FromDateTime(agora).ToString("yyyy-MM-dd", inv);
 
-    // bloqueio de dia inteiro vai de 00:00 até 00:00 do dia seguinte ao último dia
     string Periodo(BloqueioAgenda b)
     {
         var inicio = Horario.ParaBrasilia(b.Inicio);

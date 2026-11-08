@@ -44,7 +44,6 @@ public class AgendaService
             .Select(a => (Inicio: Horario.ParaBrasilia(a.Inicio), Fim: Horario.ParaBrasilia(a.Fim)))
             .ToList();
 
-        // bloqueios da profissional contam como horário ocupado
         var bloqueios = (await _context.BloqueiosAgenda
                 .Where(b => b.ProfissionalId == prof.ProfissionalId
                          && b.Inicio < fimDia
@@ -57,8 +56,6 @@ public class AgendaService
         return CalcularLivres(servico, prof, data, disponibilidade, ocupados);
     }
 
-    // versão em lote (busca do cliente): horários livres de vários serviços no mesmo dia, com 3 consultas no total.
-    // de/ate filtram pelo horário de início (ate exclusivo). Os serviços precisam vir com Profissional carregado.
     public async Task<Dictionary<int, List<DateTime>>> ObterHorariosLivres(
         IEnumerable<Servico> servicos, DateOnly data, TimeOnly? de = null, TimeOnly? ate = null)
     {
@@ -83,7 +80,6 @@ public class AgendaService
                 .Select(a => new { a.ProfissionalId, a.Inicio, a.Fim })
                 .ToListAsync();
 
-        // bloqueios da profissional contam como horário ocupado
         var bloqueios = await _context.BloqueiosAgenda
                 .Where(b => profIds.Contains(b.ProfissionalId)
                          && b.Inicio < fimDia
@@ -137,6 +133,20 @@ public class AgendaService
         return livres;
     }
 
+    public Task<List<Agendamento>> AgendamentosDoClienteNoPeriodo(int clienteId, DateTime inicioUtc, DateTime fimUtc) =>
+        _context.Agendamentos
+            .Include(a => a.Servico)
+            .Include(a => a.Profissional).ThenInclude(p => p!.Usuario)
+            .Where(a => a.ClienteId == clienteId
+                     && (a.Status == StatusAgendamento.Pendente || a.Status == StatusAgendamento.Confirmado)
+                     && a.Inicio < fimUtc && inicioUtc < a.Fim)
+            .OrderBy(a => a.Inicio)
+            .ToListAsync();
+
+    public static string MensagemConflitoCliente(Agendamento a) =>
+        $"Você já tem um agendamento nesse horário: {a.Servico?.Nome} com {a.Profissional?.Usuario?.Nome}, " +
+        $"{Horario.ParaBrasilia(a.Inicio):dd/MM 'às' HH:mm}. Para marcar este, cancele primeiro esse agendamento em Meus agendamentos.";
+
     public async Task<string?> Agendar(int clienteId, int servicoId, DateTime inicioBrasilia)
     {
         var livres = await ObterHorariosLivres(servicoId, DateOnly.FromDateTime(inicioBrasilia));
@@ -146,6 +156,11 @@ public class AgendaService
         var servico = await _context.Servico
             .Include(s => s.Profissional)
             .FirstAsync(s => s.ServicoId == servicoId);
+
+        var conflitos = await AgendamentosDoClienteNoPeriodo(clienteId,
+            Horario.ParaUtc(inicioBrasilia), Horario.ParaUtc(inicioBrasilia.AddMinutes(servico.DuracaoMinutos)));
+        if (conflitos.Count > 0)
+            return MensagemConflitoCliente(conflitos[0]);
 
         var agendamento = new Agendamento
         {

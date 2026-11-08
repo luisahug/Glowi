@@ -24,11 +24,34 @@
             </ul>
         </div>
 
+        @if (Model.Conflitos.Any())
+        {
+            <div class="alert alert-warning d-flex gap-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <div>
+                    <div class="fw-semibold">Você já tem agendamento nesse horário</div>
+                    <ul class="mb-2 small">
+                        @foreach (var c in Model.Conflitos)
+                        {
+                            var ci = Glowi.Services.Horario.ParaBrasilia(c.Inicio);
+                            var cf = Glowi.Services.Horario.ParaBrasilia(c.Fim);
+                            <li>@c.Servico?.Nome com @c.Profissional?.Usuario?.Nome · @ci.ToString("dd/MM 'das' HH:mm") às @cf.ToString("HH:mm")</li>
+                        }
+                    </ul>
+                    <div class="small mb-2">Para marcar este horário, cancele primeiro @(Model.Conflitos.Count == 1 ? "esse agendamento" : "esses agendamentos").</div>
+                    <a asp-action="MeusAgendamentos" class="btn btn-sm btn-outline-dark">Ir para Meus agendamentos</a>
+                </div>
+            </div>
+        }
+
         <form method="post" asp-action="ConfirmarAgendamento">
             <input type="hidden" name="servicoId" value="@s.ServicoId" />
             <input type="hidden" name="inicio" value="@Model.Inicio.ToString("yyyy-MM-ddTHH:mm", inv)" />
 
-            <button type="submit" class="btn btn-glow btn-lg w-100 mb-2">Confirmar</button>
+            @if (!Model.Conflitos.Any())
+            {
+                <button type="submit" class="btn btn-glow btn-lg w-100 mb-2">Confirmar</button>
+            }
             <a class="btn btn-link w-100"
                asp-action="CriarNovoAgendamento" asp-route-servicoId="@s.ServicoId"
                asp-route-data="@DateOnly.FromDateTime(Model.Inicio).ToString("yyyy-MM-dd", inv)">

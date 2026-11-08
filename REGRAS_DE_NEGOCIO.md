@@ -38,6 +38,13 @@ Um horário aparece como livre para a cliente quando atende a todas estas condi�
 
 A cliente pode agendar a partir de hoje e até **30 dias à frente**.
 
+### 4.1 Agendamentos ao mesmo tempo
+
+- O(a) cliente **não pode ter dois agendamentos ao mesmo tempo**, mesmo com profissionais diferentes. Contam os agendamentos **pendentes ou confirmados** que se sobrepõem ao novo horário (considerando a duração do serviço).
+- Na lista de horários, os que coincidem com outro agendamento do(a) cliente aparecem **riscados e desabilitados**, com um aviso de qual agendamento está no caminho.
+- Na tela de confirmação, se houver conflito, aparece o aviso e o botão Confirmar some. O(a) cliente precisa **cancelar primeiro** o agendamento concomitante em "Meus agendamentos".
+- O servidor também recusa o pedido com essa mensagem, caso o(a) cliente chegue ao horário por outro caminho.
+
 ## 5. Agendamento
 
 ### 5.1 Criação

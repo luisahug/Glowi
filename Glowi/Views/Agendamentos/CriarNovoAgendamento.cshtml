@@ -1,5 +1,6 @@
 ﻿@model Glowi.Models.ViewModels.Agendamento.AgendarViewModel
 @using System.Globalization
+@using Glowi.Services
 @{
     ViewData["Title"] = "Agendar";
     var inv = CultureInfo.InvariantCulture;
@@ -59,15 +60,47 @@
 }
 else
 {
+    var temConflito = Model.Horarios.Any(h => Model.ConflitoCom(h) != null);
+
+    if (temConflito)
+    {
+        <div class="alert alert-warning small d-flex gap-2">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <div>
+                Os horários riscados coincidem com outro agendamento seu nesse dia:
+                <ul class="mb-1">
+                    @foreach (var a in Model.MeusAgendamentosNoDia)
+                    {
+                        <li>@a.Servico?.Nome com @a.Profissional?.Usuario?.Nome · @Horario.ParaBrasilia(a.Inicio).ToString("HH:mm") às @Horario.ParaBrasilia(a.Fim).ToString("HH:mm")</li>
+                    }
+                </ul>
+                Para marcar nesses horários, cancele primeiro esse agendamento em <a asp-action="MeusAgendamentos" class="alert-link">Meus agendamentos</a>.
+            </div>
+        </div>
+    }
+
     <div class="slot-grid">
         @foreach (var h in Model.Horarios)
         {
-            <a class="btn btn-outline-primary"
-               asp-action="RevisarAgendamento"
-               asp-route-servicoId="@s.ServicoId"
-               asp-route-inicio="@h.ToString("yyyy-MM-ddTHH:mm", inv)">
-                @h.ToString("HH:mm")
-            </a>
+            var conflito = Model.ConflitoCom(h);
+
+            if (conflito != null)
+            {
+                <span class="btn btn-outline-secondary disabled text-decoration-line-through"
+                      title="Você já tem @conflito.Servico?.Nome com @conflito.Profissional?.Usuario?.Nome nesse horário"
+                      aria-label="@h.ToString("HH:mm"): você já tem agendamento nesse horário">
+                    @h.ToString("HH:mm")
+                </span>
+            }
+            else
+            {
+                <a class="btn btn-outline-primary"
+                   asp-action="RevisarAgendamento"
+                   asp-route-servicoId="@s.ServicoId"
+                   asp-route-inicio="@h.ToString("yyyy-MM-ddTHH:mm", inv)">
+                    @h.ToString("HH:mm")
+                </a>
+            }
         }
     </div>
 }

@@ -68,7 +68,11 @@ public class AgendamentosController : Controller
             Data = dia,
             Hoje = hoje,
             Maximo = maximo,
-            Horarios = await _agenda.ObterHorariosLivres(servicoId, dia)
+            Horarios = await _agenda.ObterHorariosLivres(servicoId, dia),
+            MeusAgendamentosNoDia = await _agenda.AgendamentosDoClienteNoPeriodo(
+                await ClienteLogadoIdAsync(),
+                Horario.ParaUtc(dia.ToDateTime(TimeOnly.MinValue)),
+                Horario.ParaUtc(dia.AddDays(1).ToDateTime(TimeOnly.MinValue)))
         };
 
         return View(vm);
@@ -84,7 +88,12 @@ public class AgendamentosController : Controller
         if (servico == null)
             return NotFound();
 
-        return View(new ConfirmarAgendamentoViewModel { Servico = servico, Inicio = dataHora });
+        var conflitos = await _agenda.AgendamentosDoClienteNoPeriodo(
+            await ClienteLogadoIdAsync(),
+            Horario.ParaUtc(dataHora),
+            Horario.ParaUtc(dataHora.AddMinutes(servico.DuracaoMinutos)));
+
+        return View(new ConfirmarAgendamentoViewModel { Servico = servico, Inicio = dataHora, Conflitos = conflitos });
     }
 
     [HttpPost]

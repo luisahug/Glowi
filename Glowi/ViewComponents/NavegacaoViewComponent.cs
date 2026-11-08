@@ -35,7 +35,6 @@ public class NavegacaoViewComponent : ViewComponent
         }
         else if (usuario.IsInRole("Cliente"))
         {
-            // avisos de cancelamento por bloqueio que o cliente ainda não viu
             var userId = usuario.FindFirstValue(ClaimTypes.NameIdentifier);
             pendentes = await _context.Agendamentos
                 .CountAsync(a => a.Cliente!.UsuarioId == userId
