@@ -14,7 +14,7 @@ public class EnderecoInput
     public string? Logradouro { get; set; }
 
     [Display(Name = "Número")]
-    [StringLength(10, ErrorMessage = "O número deve ter no máximo {1} caracteres.")]
+    [RegularExpression(@"^\d{1,6}$", ErrorMessage = "O número deve ter só algarismos (ex.: 312). Sem número? Deixe em branco e use o complemento.")]
     public string? Numero { get; set; }
 
     [Display(Name = "Complemento")]

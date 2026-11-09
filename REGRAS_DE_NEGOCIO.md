@@ -108,7 +108,8 @@ O agendamento guarda o preço do serviço **no momento da reserva**. Esse valor 
 - Ao digitar o CEP, rua, bairro, cidade e UF são preenchidos automaticamente (ViaCEP). Ela confere e informa o número.
 - Também pode usar o botão **"Usar minha localização atual"**, que pega a posição do GPS do aparelho e preenche o endereço.
 - O sistema converte o endereço em coordenadas (OpenStreetMap). Se não encontrar o endereço no mapa, salva assim mesmo e avisa no perfil para conferir o CEP e o número ou usar a localização atual.
-- As clientes veem **só o bairro e a cidade** da profissional, nunca o endereço completo.
+- O **número** aceita só algarismos (até 6). Endereço sem número fica com o número em branco, e o(a) profissional usa o complemento se precisar.
+- Na **busca**, os(as) clientes veem só o bairro e a cidade do(a) profissional. O **endereço completo** (rua, número, complemento, bairro, cidade/UF e CEP) aparece no perfil do(a) profissional, na escolha de horário, na confirmação do agendamento e em "Meus agendamentos".
 
 ### 8.2 Localização da cliente
 

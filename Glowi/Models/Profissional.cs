@@ -26,6 +26,22 @@
             string.Join(", ", new[] { Bairro, Cidade is null ? null : Uf is null ? Cidade : $"{Cidade}/{Uf}" }
                 .Where(s => !string.IsNullOrWhiteSpace(s))) is { Length: > 0 } texto ? texto : null;
 
+        public string? EnderecoCompleto
+        {
+            get
+            {
+                var rua = string.IsNullOrWhiteSpace(Logradouro) ? null
+                    : string.IsNullOrWhiteSpace(Numero) ? Logradouro : $"{Logradouro}, {Numero}";
+                if (rua != null && !string.IsNullOrWhiteSpace(Complemento))
+                    rua += $" - {Complemento}";
+
+                var cep = Cep is { Length: 8 } c ? $"CEP {c[..5]}-{c[5..]}" : null;
+
+                var texto = string.Join(", ", new[] { rua, BairroCidade, cep }.Where(s => !string.IsNullOrWhiteSpace(s)));
+                return texto.Length > 0 ? texto : null;
+            }
+        }
+
         public ICollection<Servico> Servicos { get; set; } = new List<Servico>();
     }
 }

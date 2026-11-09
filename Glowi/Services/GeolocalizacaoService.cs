@@ -116,7 +116,8 @@ public class GeolocalizacaoService
             var bairro = a.Suburb ?? a.Neighbourhood ?? a.Quarter ?? a.CityDistrict;
             var cidade = a.City ?? a.Town ?? a.Village ?? a.Municipality;
             var uf = a.Uf;
-            return new EnderecoEncontrado(SoDigitos(a.Postcode), a.Road, a.HouseNumber, bairro, cidade, uf, Rotulo(bairro, cidade, uf));
+            var numero = a.HouseNumber is { } n && System.Text.RegularExpressions.Regex.Match(n, @"\d{1,6}") is { Success: true } m ? m.Value : null;
+            return new EnderecoEncontrado(SoDigitos(a.Postcode), a.Road, numero, bairro, cidade, uf, Rotulo(bairro, cidade, uf));
         });
     }
     public async Task<bool> AplicarEnderecoAsync(Profissional p, EnderecoInput e, CancellationToken ct = default)

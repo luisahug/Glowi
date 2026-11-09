@@ -26,7 +26,7 @@
                 var localTexto = string.Join(" · ", new[]
                 {
                     distanciaKm is double km ? $"a {Glowi.Services.Distancia.Formatar(km)} de você" : null,
-                    Model.BairroCidade
+                    Model.EnderecoCompleto
                 }.Where(t => t != null));
             }
             @if (localTexto.Length > 0)

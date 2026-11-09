@@ -171,6 +171,13 @@ window.GlowiLocal = (() => {
         container.querySelectorAll('[data-endereco-campo], [data-endereco-cep]')
             .forEach(c => c.addEventListener('input', limparCoordenadas));
 
+        // número: só algarismos
+        const numero = campo('numero');
+        numero?.addEventListener('input', () => {
+            const digitos = numero.value.replace(/\D/g, '').slice(0, 6);
+            if (numero.value !== digitos) numero.value = digitos;
+        });
+
         const preencher = (dados, sobrescrever) => {
             for (const nome of ['logradouro', 'numero', 'bairro', 'cidade', 'uf']) {
                 const el = campo(nome);

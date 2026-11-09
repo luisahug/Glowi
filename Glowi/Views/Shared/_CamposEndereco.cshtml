@@ -8,7 +8,7 @@
     </legend>
     <p class="small text-muted mb-3">
         Opcional, mas sem ele você aparece no fim das buscas por proximidade.
-        Os(as) clientes veem só o bairro e a cidade.
+        Na busca, os(as) clientes veem só o bairro e a cidade; o endereço completo aparece no seu perfil e na hora de agendar.
     </p>
 
     <button type="button" class="btn btn-outline-primary btn-sm mb-3" data-endereco-gps>
@@ -24,7 +24,7 @@
         </div>
         <div class="col-5 col-sm-3">
             <div class="form-floating">
-                <input asp-for="Numero" class="form-control" placeholder="Nº" data-endereco-campo="numero" />
+                <input asp-for="Numero" class="form-control" placeholder="Nº" inputmode="numeric" pattern="\d*" maxlength="6" data-endereco-campo="numero" />
                 <label asp-for="Numero"></label>
             </div>
         </div>
