@@ -4,4 +4,25 @@
     $.validator.methods.number = function(value, element) {
         return this.optional(element) || /^-?\d+(?:\.\d{3})*(?:,\d+)?$/.test(value);
     };
+
+    // mensagens padrão do jQuery Validate (usadas quando o campo não traz data-val-* do servidor)
+    $.extend($.validator.messages, {
+        required: "Preencha este campo.",
+        remote: "Corrija este campo.",
+        email: "Informe um email válido.",
+        url: "Informe um endereço web válido.",
+        date: "Informe uma data válida.",
+        dateISO: "Informe uma data válida.",
+        number: "Informe um número válido.",
+        digits: "Informe só algarismos.",
+        equalTo: "Os valores não conferem.",
+        maxlength: $.validator.format("Informe no máximo {0} caracteres."),
+        minlength: $.validator.format("Informe pelo menos {0} caracteres."),
+        rangelength: $.validator.format("Informe entre {0} e {1} caracteres."),
+        range: $.validator.format("Informe um valor entre {0} e {1}."),
+        max: $.validator.format("Informe um valor menor ou igual a {0}."),
+        min: $.validator.format("Informe um valor maior ou igual a {0}."),
+        step: $.validator.format("Informe um múltiplo de {0}."),
+        pattern: "Formato inválido."
+    });
 </script>

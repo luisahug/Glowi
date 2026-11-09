@@ -1,0 +1,11 @@
+@page
+@model LockoutModel
+@{
+    ViewData["Title"] = "Conta bloqueada";
+}
+
+<div class="text-center py-5">
+    <div class="display-3 fw-bold text-gradient mb-2"><i class="bi bi-lock"></i></div>
+    <p class="lead text-muted mb-4">Sua conta foi bloqueada temporariamente por excesso de tentativas. Tente novamente mais tarde.</p>
+    <a asp-page="./Login" class="btn btn-primary">Voltar para o login</a>
+</div>
