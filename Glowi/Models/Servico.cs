@@ -11,6 +11,12 @@ namespace Glowi.Models
         [Required(ErrorMessage = "Informe o nome do serviço.")]
         public string Nome { get; set; }
 
+        [Display(Name = "Técnicas")]
+        public List<string> Tecnicas { get; set; } = new();
+
+        public const int TecnicaMaximo = 60;
+        public const int TecnicasMaximo = 10;
+
         [Display(Name = "Duração (min)")]
         [Range(5, 480, ErrorMessage = "A duração deve ser entre 5 e 480 minutos.")]
         public int DuracaoMinutos { get; set; }

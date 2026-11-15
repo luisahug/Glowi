@@ -31,9 +31,19 @@
                         data-modo="editar"
                         data-id="@s.ServicoId"
                         data-nome="@s.Nome"
+                        data-tecnicas="@System.Text.Json.JsonSerializer.Serialize(s.Tecnicas)"
                         data-duracao="@s.DuracaoMinutos"
                         data-preco="@s.Preco.ToString("0.00")">
                     <h5 class="card-title">@s.Nome</h5>
+                    @if (s.Tecnicas.Any())
+                    {
+                        <div class="d-flex flex-wrap gap-1 mb-2">
+                            @foreach (var t in s.Tecnicas)
+                            {
+                                <span class="badge badge-soft-secondary">@t</span>
+                            }
+                        </div>
+                    }
                     <p class="card-text text-muted mb-1"><i class="bi bi-clock me-1"></i>@s.DuracaoMinutos min</p>
                     <p class="card-text price mb-0">@s.Preco.ToString("C")</p>
                 </button>
@@ -62,6 +72,31 @@
                     <div class="form-floating mb-3">
                         <input name="Nome" id="campoNome" class="form-control" placeholder="Nome" required maxlength="100" />
                         <label for="campoNome">Nome do serviço</label>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <div class="form-floating">
+                                <input id="campoTecnica" class="form-control" placeholder="Técnica"
+                                       maxlength="@Glowi.Models.Servico.TecnicaMaximo" list="sugestoesTecnica" autocomplete="off"
+                                       aria-describedby="ajudaTecnica" />
+                                <label for="campoTecnica">Técnicas (opcional)</label>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary" id="btnAddTecnica" aria-label="Adicionar técnica">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                        <div class="form-text" id="ajudaTecnica">
+                            Digite e toque em <strong>+</strong> (ou Enter) para adicionar. Ex.: gel, fibra de vidro, fio a fio. Até @Glowi.Models.Servico.TecnicasMaximo técnicas.
+                        </div>
+                        <div class="small text-danger mt-1 d-none" id="avisoTecnica" role="status" aria-live="polite"></div>
+                        <div class="d-flex flex-wrap gap-1 mt-2" id="listaTecnicas" aria-label="Técnicas adicionadas"></div>
+                        <datalist id="sugestoesTecnica">
+                            @foreach (var t in Model.SelectMany(x => x.Tecnicas).Distinct(StringComparer.OrdinalIgnoreCase).Order())
+                            {
+                                <option value="@t"></option>
+                            }
+                        </datalist>
                     </div>
 
                     <div class="form-floating mb-3">
@@ -97,6 +132,76 @@
         const titulo = document.getElementById('modalServicoTitulo');
         const campoId = document.getElementById('campoId');
         const campoNome = document.getElementById('campoNome');
+        const campoTecnica = document.getElementById('campoTecnica');
+        const btnAddTecnica = document.getElementById('btnAddTecnica');
+        const avisoTecnica = document.getElementById('avisoTecnica');
+        const listaTecnicas = document.getElementById('listaTecnicas');
+        const maximoTecnicas = @Glowi.Models.Servico.TecnicasMaximo;
+        let tecnicas = [];
+
+        const avisar = (texto) => {
+            avisoTecnica.textContent = texto ?? '';
+            avisoTecnica.classList.toggle('d-none', !texto);
+        };
+
+        const desenharTecnicas = () => {
+            listaTecnicas.replaceChildren(...tecnicas.map((tecnica, i) => {
+                const chip = document.createElement('span');
+                chip.className = 'badge badge-soft-primary d-inline-flex align-items-center gap-1 py-2 ps-2 pe-1';
+                chip.append(tecnica);
+
+                const oculto = document.createElement('input');
+                oculto.type = 'hidden';
+                oculto.name = 'Tecnicas';
+                oculto.value = tecnica;
+
+                const remover = document.createElement('button');
+                remover.type = 'button';
+                remover.className = 'btn-close';
+                remover.style.fontSize = '.55rem';
+                remover.setAttribute('aria-label', 'Remover ' + tecnica);
+                remover.addEventListener('click', () => {
+                    tecnicas.splice(i, 1);
+                    avisar();
+                    desenharTecnicas();
+                    campoTecnica.focus();
+                });
+
+                chip.append(oculto, remover);
+                return chip;
+            }));
+            const cheio = tecnicas.length >= maximoTecnicas;
+            campoTecnica.disabled = cheio;
+            btnAddTecnica.disabled = cheio;
+        };
+
+        const adicionarTecnica = () => {
+            const tecnica = campoTecnica.value.trim().replace(/\s+/g, ' ');
+            if (!tecnica) return;
+            if (tecnicas.some(t => t.toLocaleLowerCase() === tecnica.toLocaleLowerCase())) {
+                avisar('Essa técnica já foi adicionada.');
+                return;
+            }
+            if (tecnicas.length >= maximoTecnicas) {
+                avisar(`Máximo de ${maximoTecnicas} técnicas por serviço.`);
+                return;
+            }
+            tecnicas.push(tecnica);
+            campoTecnica.value = '';
+            avisar();
+            desenharTecnicas();
+            campoTecnica.focus();
+        };
+
+        btnAddTecnica.addEventListener('click', adicionarTecnica);
+        campoTecnica.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                adicionarTecnica();
+            }
+        });
+
+        form.addEventListener('submit', adicionarTecnica);
         const campoDuracao = document.getElementById('campoDuracao');
         const campoPreco = document.getElementById('campoPreco');
         const btnExcluir = document.getElementById('btnExcluir');
@@ -115,6 +220,10 @@
             campoId.value = editar ? card.dataset.id : '';
 
             campoNome.value = editar ? card.dataset.nome : '';
+            campoTecnica.value = '';
+            tecnicas = editar ? JSON.parse(card.dataset.tecnicas || '[]') : [];
+            avisar();
+            desenharTecnicas();
             campoDuracao.value = editar ? card.dataset.duracao : '';
             campoPreco.value = editar ? card.dataset.preco : '';
 

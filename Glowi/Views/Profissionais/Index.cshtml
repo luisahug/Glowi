@@ -7,6 +7,10 @@
     var inv = System.Globalization.CultureInfo.InvariantCulture;
     var dataRota = Model.Data?.ToString("yyyy-MM-dd", inv);
     bool Destaca(string texto) => Model.Busca != null && texto.Contains(Model.Busca, StringComparison.OrdinalIgnoreCase);
+    bool DestacaServico(Glowi.Models.Servico s) =>
+        Model.Tecnica != null
+            ? s.Tecnicas.Contains(Model.Tecnica, StringComparer.OrdinalIgnoreCase)
+            : Destaca(s.Nome) || s.Tecnicas.Any(Destaca);
 
     string UrlCom(string chave, string? valor)
     {
@@ -22,7 +26,7 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <div class="page-header mb-0">
         <h1>Agendar</h1>
-        <p>Busque por profissional, serviço ou tipo de profissional.</p>
+        <p>Busque por profissional, serviço, técnica ou tipo de profissional.</p>
     </div>
 
     <div class="btn-group" role="group" aria-label="Ver resultados por">
@@ -85,6 +89,21 @@
                         <option value="@t" selected="@string.Equals(t, Model.Tipo, StringComparison.OrdinalIgnoreCase)">@t</option>
                     }
                 </select>
+            </section>
+
+            <section class="filtro-secao">
+                <label class="filtro-titulo" for="filtroTecnica">Técnica</label>
+                <select class="form-select" name="tecnica" id="filtroTecnica" disabled="@(!Model.Tecnicas.Any())">
+                    <option value="">Todas</option>
+                    @foreach (var t in Model.Tecnicas)
+                    {
+                        <option value="@t" selected="@string.Equals(t, Model.Tecnica, StringComparison.OrdinalIgnoreCase)">@t</option>
+                    }
+                </select>
+                @if (!Model.Tecnicas.Any())
+                {
+                    <p class="small text-muted mt-2 mb-0">Nenhum serviço com técnica informada ainda.</p>
+                }
             </section>
 
             <section class="filtro-secao">
@@ -213,6 +232,10 @@ else if (Model.VerServicos)
                     <div class="min-w-0">
                         <div class="fw-semibold">@s.Nome</div>
                         <div class="text-muted small">
+                            @foreach (var t in s.Tecnicas)
+                            {
+                                <span class="badge @(string.Equals(t, Model.Tecnica, StringComparison.OrdinalIgnoreCase) ? "badge-soft-primary" : "badge-soft-secondary") me-1">@t</span>
+                            }
                             <i class="bi bi-clock me-1"></i>@s.DuracaoMinutos min
                             · <a asp-action="Detalhes" asp-route-id="@p.ProfissionalId" asp-route-data="@dataRota">@p.Usuario?.Nome</a>
                             @if (!string.IsNullOrWhiteSpace(p.Especialidade))
@@ -247,7 +270,7 @@ else
         @foreach (var p in Model.Profissionais)
         {
             var nome = p.Usuario?.Nome ?? "";
-            var servicos = p.Servicos.OrderByDescending(s => Destaca(s.Nome)).Take(3).ToList();
+            var servicos = p.Servicos.OrderByDescending(DestacaServico).Take(3).ToList();
             var restantes = p.Servicos.Count - servicos.Count;
             <div class="col">
                 <a asp-action="Detalhes" asp-route-id="@p.ProfissionalId" asp-route-data="@dataRota" class="card h-100 text-reset">
@@ -278,7 +301,7 @@ else
                             <div class="d-flex flex-wrap gap-1 mb-2">
                                 @foreach (var s in servicos)
                                 {
-                                    <span class="badge @(Destaca(s.Nome) ? "badge-soft-primary" : "badge-soft-secondary")">@s.Nome</span>
+                                    <span class="badge @(DestacaServico(s) ? "badge-soft-primary" : "badge-soft-secondary")">@s.Nome</span>
                                 }
                                 @if (restantes > 0)
                                 {

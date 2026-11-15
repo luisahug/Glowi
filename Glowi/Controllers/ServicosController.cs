@@ -51,11 +51,18 @@ namespace Glowi.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Nome,DuracaoMinutos,Preco")] Servico servico)
+        public async Task<IActionResult> Create([Bind("Nome,Tecnicas,DuracaoMinutos,Preco")] Servico servico)
         {
             if (!ModelState.IsValid)
             {
                 TempData["Erro"] = "Não foi possível salvar. Confira os campos e tente de novo.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            servico.Tecnicas = NormalizarTecnicas(servico.Tecnicas);
+            if (ErroTecnicas(servico.Tecnicas) is { } erroTecnicas)
+            {
+                TempData["Erro"] = erroTecnicas;
                 return RedirectToAction(nameof(Index));
             }
 
@@ -69,7 +76,7 @@ namespace Glowi.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Nome,DuracaoMinutos,Preco")] Servico dados)
+        public async Task<IActionResult> Edit(int id, [Bind("Nome,Tecnicas,DuracaoMinutos,Preco")] Servico dados)
         {
             var profissional = await ProfissionalLogadoAsync();
 
@@ -84,7 +91,15 @@ namespace Glowi.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            var tecnicas = NormalizarTecnicas(dados.Tecnicas);
+            if (ErroTecnicas(tecnicas) is { } erroTecnicas)
+            {
+                TempData["Erro"] = erroTecnicas;
+                return RedirectToAction(nameof(Index));
+            }
+
             servico.Nome = dados.Nome;
+            servico.Tecnicas = tecnicas;
             servico.DuracaoMinutos = dados.DuracaoMinutos;
             servico.Preco = dados.Preco;
             await _context.SaveChangesAsync();
@@ -209,6 +224,18 @@ namespace Glowi.Controllers
             TempData["Sucesso"] = "Imagem removida.";
             return RedirectToAction(nameof(Imagens), new { id = imagem.ServicoId });
         }
+        private static List<string> NormalizarTecnicas(IEnumerable<string?>? tecnicas) =>
+            (tecnicas ?? Enumerable.Empty<string?>())
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Select(t => string.Join(" ", t!.Split(" ", StringSplitOptions.RemoveEmptyEntries)))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+        private static string? ErroTecnicas(List<string> tecnicas) =>
+            tecnicas.Count > Servico.TecnicasMaximo ? $"Cada serviço pode ter no máximo {Servico.TecnicasMaximo} técnicas."
+            : tecnicas.Any(t => t.Length > Servico.TecnicaMaximo) ? $"Cada técnica deve ter no máximo {Servico.TecnicaMaximo} caracteres."
+            : null;
+
         private async Task ApagarDoBucket(string caminho)
         {
             try

@@ -70,7 +70,13 @@
                     <span class="icon-box icon-box-sm"><i class="bi bi-stars"></i></span>
                     <div>
                         <div class="fw-semibold">@s.Nome</div>
-                        <div class="text-muted small"><i class="bi bi-clock me-1"></i>@s.DuracaoMinutos min</div>
+                        <div class="text-muted small">
+                            @foreach (var t in s.Tecnicas)
+                            {
+                                <span class="badge badge-soft-secondary me-1">@t</span>
+                            }
+                            <i class="bi bi-clock me-1"></i>@s.DuracaoMinutos min
+                        </div>
                     </div>
                 </div>
                 <div class="text-end">

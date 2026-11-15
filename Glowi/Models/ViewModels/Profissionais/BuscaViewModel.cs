@@ -10,6 +10,7 @@ public class BuscaViewModel
 
     public string? Busca { get; set; }
     public string? Tipo { get; set; }
+    public string? Tecnica { get; set; }
     public bool VerServicos { get; set; }
     public DateOnly? Data { get; set; }
     public string? Turno { get; set; }
@@ -27,6 +28,7 @@ public class BuscaViewModel
         : "distância não informada";
     public HashSet<int> Favoritas { get; set; } = new();
     public List<string> Tipos { get; set; } = new();
+    public List<string> Tecnicas { get; set; } = new();
 
     public List<Profissional> Profissionais { get; set; } = new();
     public List<Servico> Servicos { get; set; } = new();
@@ -38,6 +40,7 @@ public class BuscaViewModel
         {
             var filtros = new List<(string, string)>();
             if (!string.IsNullOrEmpty(Tipo)) filtros.Add(("tipo", Tipo));
+            if (!string.IsNullOrEmpty(Tecnica)) filtros.Add(("tecnica", Tecnica));
             if (Data is DateOnly data)
             {
                 filtros.Add(("data", data == Hoje ? "Hoje" : data == Hoje.AddDays(1) ? "Amanhã" : data.ToString("ddd, dd/MM")));

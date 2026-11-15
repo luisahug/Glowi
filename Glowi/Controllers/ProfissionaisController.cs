@@ -26,18 +26,26 @@ namespace Glowi.Controllers
         private static string Contem(string texto) =>
             "%" + texto.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_") + "%";
 
-        private static IEnumerable<Servico> ServicosRelevantes(Profissional p, string? busca)
+        private static string Exato(string texto) =>
+            texto.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");
+
+        private static IEnumerable<Servico> ServicosRelevantes(Profissional p, string? busca, string? tecnica)
         {
+            var candidatos = tecnica == null
+                ? p.Servicos.ToList()
+                : p.Servicos.Where(s => s.Tecnicas.Contains(tecnica, StringComparer.OrdinalIgnoreCase)).ToList();
             var encontrados = busca == null
                 ? new List<Servico>()
-                : p.Servicos.Where(s => s.Nome.Contains(busca, StringComparison.OrdinalIgnoreCase)).ToList();
-            return encontrados.Any() ? encontrados : p.Servicos;
+                : candidatos.Where(s => s.Nome.Contains(busca, StringComparison.OrdinalIgnoreCase) ||
+                                   s.Tecnicas.Any(t => t.Contains(busca, StringComparison.OrdinalIgnoreCase))).ToList();
+            return encontrados.Any() ? encontrados : candidatos;
         }
 
-        public async Task<IActionResult> Index(string? busca, string? tipo, string? ver, DateOnly? data, string? turno)
+        public async Task<IActionResult> Index(string? busca, string? tipo, string? tecnica, string? ver, DateOnly? data, string? turno)
         {
             busca = string.IsNullOrWhiteSpace(busca) ? null : busca.Trim();
             tipo = string.IsNullOrWhiteSpace(tipo) ? null : tipo.Trim();
+            tecnica = string.IsNullOrWhiteSpace(tecnica) ? null : tecnica.Trim();
 
             var hoje = DateOnly.FromDateTime(Horario.Agora);
             var maximo = hoje.AddDays(DiasMaximosNoFuturo);
@@ -50,6 +58,7 @@ namespace Glowi.Controllers
             {
                 Busca = busca,
                 Tipo = tipo,
+                Tecnica = tecnica,
                 VerServicos = ver == "servicos",
                 Data = data,
                 Turno = turno,
@@ -72,7 +81,20 @@ namespace Glowi.Controllers
                 .OrderBy(e => e)
                 .ToList();
 
+            var tecnicas = await _context.Servico
+                .Where(s => s.Tecnicas.Any())
+                .Select(s => s.Tecnicas)
+                .ToListAsync();
+
+            vm.Tecnicas = tecnicas
+                .SelectMany(t => t)
+                .GroupBy(t => t.ToLower())
+                .Select(g => g.First())
+                .OrderBy(t => t)
+                .ToList();
+
             var padrao = busca == null ? null : Contem(busca);
+            var padraoTecnica = tecnica == null ? null : Exato(tecnica);
 
             if (vm.VerServicos)
             {
@@ -84,9 +106,13 @@ namespace Glowi.Controllers
                 if (tipo != null)
                     servicos = servicos.Where(s => EF.Functions.ILike(s.Profissional!.Especialidade!.Trim(), tipo));
 
+                if (padraoTecnica != null)
+                    servicos = servicos.Where(s => s.Tecnicas.Any(t => EF.Functions.ILike(t, padraoTecnica)));
+
                 if (padrao != null)
                     servicos = servicos.Where(s =>
                         EF.Functions.ILike(s.Nome, padrao) ||
+                        s.Tecnicas.Any(t => EF.Functions.ILike(t, padrao)) ||
                         EF.Functions.ILike(s.Profissional!.Usuario!.Nome, padrao));
 
                 if (local != null)
@@ -134,11 +160,14 @@ namespace Glowi.Controllers
                 if (tipo != null)
                     profissionais = profissionais.Where(p => EF.Functions.ILike(p.Especialidade!.Trim(), tipo));
 
+                if (padraoTecnica != null)
+                    profissionais = profissionais.Where(p => p.Servicos.Any(s => s.Tecnicas.Any(t => EF.Functions.ILike(t, padraoTecnica))));
+
                 if (padrao != null)
                     profissionais = profissionais.Where(p =>
                         EF.Functions.ILike(p.Usuario!.Nome, padrao) ||
                         EF.Functions.ILike(p.Especialidade!, padrao) ||
-                        p.Servicos.Any(s => EF.Functions.ILike(s.Nome, padrao)));
+                        p.Servicos.Any(s => EF.Functions.ILike(s.Nome, padrao) || s.Tecnicas.Any(t => EF.Functions.ILike(t, padrao))));
 
                 if (local != null)
                 {
@@ -164,7 +193,7 @@ namespace Glowi.Controllers
 
                 if (data is DateOnly dia)
                 {
-                    var relevantes = vm.Profissionais.ToDictionary(p => p.ProfissionalId, p => ServicosRelevantes(p, busca).ToList());
+                    var relevantes = vm.Profissionais.ToDictionary(p => p.ProfissionalId, p => ServicosRelevantes(p, busca, tecnica).ToList());
                     var livres = await _agenda.ObterHorariosLivres(relevantes.Values.SelectMany(s => s), dia, faixaTurno.De, faixaTurno.Ate);
 
                     foreach (var (profissionalId, servicosDaProfissional) in relevantes)
