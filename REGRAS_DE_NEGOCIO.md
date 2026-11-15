@@ -15,6 +15,7 @@ Todos os horários do sistema seguem o **horário de Brasília**.
 ## 2. Serviços
 
 - Cada serviço da profissional tem nome, duração (de **5 a 480 minutos**) e preço (de **R$ 0,01 a R$ 10.000,00**).
+- O serviço pode ter **várias técnicas** (opcional, até **10** por serviço, cada uma com até 60 caracteres, ex.: gel, fibra de vidro, fio a fio). A profissional digita e toca em **+** para adicionar cada uma; técnica repetida no mesmo serviço é ignorada. Na busca, a cliente pode filtrar por técnica: a lista mostra as técnicas que as profissionais cadastraram, sem diferenciar maiúsculas de minúsculas. No modo "Profissionais", aparecem as profissionais que têm pelo menos um serviço com a técnica escolhida. A busca por texto também encontra a técnica.
 - Cada serviço pode ter até **10 fotos** (JPG, PNG ou WEBP, com até **5 MB** cada).
 - A profissional só vê e altera os próprios serviços.
 - Alterar o preço de um serviço não muda os agendamentos já feitos (ver 5.3).
@@ -124,4 +125,4 @@ O agendamento guarda o preço do serviço **no momento da reserva**. Esse valor 
 - Com a localização definida, aparecem só as profissionais **dentro do raio**, da mais perto para a mais longe, com a distância em cada card.
 - Profissionais que **não informaram endereço** continuam aparecendo, **no fim da lista**, marcadas como "distância não informada".
 - A distância é em linha reta (não é o trajeto de carro ou a pé).
-- Os outros filtros (tipo de profissional, texto, data e turno) continuam valendo junto com a distância.
+- Os outros filtros (tipo de profissional, técnica, texto, data e turno) continuam valendo junto com a distância.
