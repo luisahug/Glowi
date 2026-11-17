@@ -40,6 +40,13 @@ public class NavegacaoViewComponent : ViewComponent
                 .CountAsync(a => a.Cliente!.UsuarioId == userId
                               && a.CanceladoPorBloqueio
                               && !a.ClienteViuCancelamento);
+
+            var agora = DateTime.UtcNow;
+            pendentes += await _context.HorariosDesejados
+                .CountAsync(h => h.Cliente!.UsuarioId == userId
+                              && h.LiberadoEm != null
+                              && !h.ClienteViuAviso
+                              && h.Inicio > agora);
         }
 
         return View((Itens: itens, Ativo: ativo, Pendentes: pendentes));

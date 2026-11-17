@@ -62,20 +62,80 @@ public class AgendamentosController : Controller
         if (dia < hoje) dia = hoje;
         if (dia > maximo) dia = maximo;
 
+        var clienteId = await ClienteLogadoIdAsync();
+        var inicioDia = Horario.ParaUtc(dia.ToDateTime(TimeOnly.MinValue));
+        var fimDia = Horario.ParaUtc(dia.AddDays(1).ToDateTime(TimeOnly.MinValue));
+
+        var horarios = await _agenda.ObterHorariosDoDia(servicoId, dia);
+
+        var naListaEspera = await _context.HorariosDesejados
+            .Where(h => h.ClienteId == clienteId && h.ServicoId == servicoId
+                     && h.Inicio >= inicioDia && h.Inicio < fimDia)
+            .Select(h => h.Inicio)
+            .ToListAsync();
+
         var vm = new AgendarViewModel
         {
             Servico = servico,
             Data = dia,
             Hoje = hoje,
             Maximo = maximo,
-            Horarios = await _agenda.ObterHorariosLivres(servicoId, dia),
-            MeusAgendamentosNoDia = await _agenda.AgendamentosDoClienteNoPeriodo(
-                await ClienteLogadoIdAsync(),
-                Horario.ParaUtc(dia.ToDateTime(TimeOnly.MinValue)),
-                Horario.ParaUtc(dia.AddDays(1).ToDateTime(TimeOnly.MinValue)))
+            Horarios = horarios.Where(h => h.Livre).Select(h => h.Inicio).ToList(),
+            Ocupados = horarios.Where(h => !h.Livre).Select(h => h.Inicio).ToList(),
+            NaListaEspera = naListaEspera.Select(Horario.ParaBrasilia).ToHashSet(),
+            MeusAgendamentosNoDia = await _agenda.AgendamentosDoClienteNoPeriodo(clienteId, inicioDia, fimDia)
         };
 
         return View(vm);
+    }
+
+    // T30: botão "Avise-me se liberar" num horário ocupado
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AvisarSeLiberar(int servicoId, string inicio)
+    {
+        if (!TentarLerInicio(inicio, out var dataHora))
+            return BadRequest();
+
+        var dia = DateOnly.FromDateTime(dataHora);
+        var hoje = DateOnly.FromDateTime(Horario.Agora);
+
+        var erro = dia < hoje || dia > hoje.AddDays(DiasMaximosNoFuturo)
+            ? "Esse horário não está disponível para lista de espera."
+            : await _agenda.EntrarNaListaEspera(await ClienteLogadoIdAsync(), servicoId, dataHora);
+
+        if (erro != null)
+            TempData["Erro"] = erro;
+        else
+            TempData["Sucesso"] = $"Pronto! Se o horário de {dataHora:dd/MM 'às' HH:mm} liberar, você será avisado(a) em Meus agendamentos.";
+
+        return RedirectToAction(nameof(CriarNovoAgendamento), new
+        {
+            servicoId,
+            data = dia.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SairDaListaEspera(int id, string? returnUrl)
+    {
+        var clienteId = await ClienteLogadoIdAsync();
+
+        var desejado = await _context.HorariosDesejados
+            .FirstOrDefaultAsync(h => h.HorarioDesejadoId == id && h.ClienteId == clienteId);
+
+        if (desejado != null)
+        {
+            _context.HorariosDesejados.Remove(desejado);
+            await _context.SaveChangesAsync();
+        }
+
+        TempData["Sucesso"] = "Horário removido da sua lista de espera.";
+
+        if (Url.IsLocalUrl(returnUrl))
+            return LocalRedirect(returnUrl);
+        return RedirectToAction(nameof(MeusAgendamentos));
     }
 
     [HttpGet]
@@ -145,13 +205,22 @@ public class AgendamentosController : Controller
             AvisosCancelamento = agendamentos
                 .Where(a => a.CanceladoPorBloqueio && !a.ClienteViuCancelamento)
                 .OrderBy(a => a.Inicio)
-                .ToList()
+                .ToList(),
+            HorariosDesejados = await _context.HorariosDesejados
+                .Include(h => h.Servico)
+                .Include(h => h.Profissional).ThenInclude(p => p!.Usuario)
+                .Where(h => h.ClienteId == clienteId && h.Inicio > agora)
+                .OrderBy(h => h.Inicio)
+                .ToListAsync()
         };
 
+        vm.AvisosLiberados = vm.HorariosDesejados.Where(h => h.Liberado && !h.ClienteViuAviso).ToList();
+
         // o aviso aparece uma vez: ao abrir a página, conta como visto
-        if (vm.AvisosCancelamento.Count > 0)
+        if (vm.AvisosCancelamento.Count > 0 || vm.AvisosLiberados.Count > 0)
         {
             vm.AvisosCancelamento.ForEach(a => a.ClienteViuCancelamento = true);
+            vm.AvisosLiberados.ForEach(h => h.ClienteViuAviso = true);
             await _context.SaveChangesAsync();
         }
 
@@ -178,6 +247,9 @@ public class AgendamentosController : Controller
 
         agendamento.Status = StatusAgendamento.Cancelado;
         await _context.SaveChangesAsync();
+
+        // T29: quem estava na lista de espera desse horário é avisado(a)
+        await _agenda.LiberarListaEspera(agendamento);
 
         TempData["Sucesso"] = "Agendamento cancelado.";
         return RedirectToAction(nameof(MeusAgendamentos));

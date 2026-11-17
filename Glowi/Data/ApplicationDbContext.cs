@@ -19,6 +19,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ServicoImagem> ServicoImagens => Set<ServicoImagem>();
     public DbSet<Favorito> Favoritos => Set<Favorito>();
     public DbSet<BloqueioAgenda> BloqueiosAgenda => Set<BloqueioAgenda>();
+    public DbSet<HorarioDesejado> HorariosDesejados => Set<HorarioDesejado>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -74,6 +75,16 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         {
             b.HasOne(x => x.Profissional).WithMany().HasForeignKey(x => x.ProfissionalId).OnDelete(DeleteBehavior.Cascade);
             b.HasIndex(x => new { x.ProfissionalId, x.Inicio });
+        });
+
+        builder.Entity<HorarioDesejado>(h =>
+        {
+            h.HasOne(x => x.Cliente).WithMany().HasForeignKey(x => x.ClienteId).OnDelete(DeleteBehavior.Cascade);
+            h.HasOne(x => x.Servico).WithMany().HasForeignKey(x => x.ServicoId).OnDelete(DeleteBehavior.Cascade);
+            h.HasOne(x => x.Profissional).WithMany().HasForeignKey(x => x.ProfissionalId).OnDelete(DeleteBehavior.Cascade);
+            // a mesma cliente não entra duas vezes na espera do mesmo serviço no mesmo horário
+            h.HasIndex(x => new { x.ClienteId, x.ServicoId, x.Inicio }).IsUnique();
+            h.HasIndex(x => new { x.ProfissionalId, x.Inicio });
         });
     }
 }

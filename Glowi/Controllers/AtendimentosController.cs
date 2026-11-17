@@ -15,13 +15,16 @@ public class AtendimentosController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly AgendaService _agenda;
 
     public AtendimentosController(
         ApplicationDbContext context,
-        UserManager<ApplicationUser> userManager)
+        UserManager<ApplicationUser> userManager,
+        AgendaService agenda)
     {
         _context = context;
         _userManager = userManager;
+        _agenda = agenda;
     }
 
     private async Task<int> ProfissionalLogadoIdAsync()
@@ -138,6 +141,11 @@ public class AtendimentosController : Controller
         {
             agendamento.Status = novoStatus;
             await _context.SaveChangesAsync();
+
+            // T29: recusou, o horário liberou para quem estava na lista de espera
+            if (novoStatus == StatusAgendamento.Recusado)
+                await _agenda.LiberarListaEspera(agendamento);
+
             TempData["Sucesso"] = mensagem;
         }
 

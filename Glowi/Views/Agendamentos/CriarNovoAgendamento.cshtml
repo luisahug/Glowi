@@ -31,6 +31,14 @@
 {
     <div class="alert alert-warning">@erro</div>
 }
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success alert-dismissible fade show d-flex gap-2" role="alert">
+        <i class="bi bi-bell-fill"></i>
+        <div>@sucesso</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+}
 
 <form method="get" asp-action="CriarNovoAgendamento" class="d-flex flex-wrap align-items-end gap-2 mb-4">
     <input type="hidden" name="servicoId" value="@s.ServicoId" />
@@ -53,9 +61,9 @@
        asp-route-data="@proximoDia.ToString("yyyy-MM-dd", inv)" aria-label="Próximo dia"><i class="bi bi-chevron-right"></i></a>
 </form>
 
-<h2 class="section-title">Horários livres em @Model.Data.ToString("dddd, dd/MM")</h2>
+<h2 class="section-title">Horários em @Model.Data.ToString("dddd, dd/MM")</h2>
 
-@if (!Model.Horarios.Any())
+@if (!Model.Horarios.Any() && !Model.Ocupados.Any())
 {
     <div class="empty-state">
         <span class="icon-box"><i class="bi bi-calendar-x"></i></span>
@@ -64,7 +72,20 @@
 }
 else
 {
-    var temConflito = Model.Horarios.Any(h => Model.ConflitoCom(h) != null);
+    var temConflito = Model.Horarios.Concat(Model.Ocupados).Any(h => Model.ConflitoCom(h) != null);
+    var ocupados = Model.Ocupados.ToHashSet();
+    var todos = Model.Horarios.Concat(Model.Ocupados).OrderBy(h => h).ToList();
+
+    if (!Model.Horarios.Any())
+    {
+        <p class="text-muted small">Todos os horários desse dia já foram reservados. Toque em um horário para ser avisado(a) se ele liberar.</p>
+    }
+    else if (Model.Ocupados.Any())
+    {
+        <p class="text-muted small d-flex align-items-center gap-1">
+            <i class="bi bi-bell"></i> Horários ocupados: toque para ser avisado(a) se liberar.
+        </p>
+    }
 
     if (temConflito)
     {
@@ -84,11 +105,34 @@ else
     }
 
     <div class="slot-grid">
-        @foreach (var h in Model.Horarios)
+        @foreach (var h in todos)
         {
             var conflito = Model.ConflitoCom(h);
+            var ocupado = ocupados.Contains(h);
 
-            if (conflito != null)
+            if (ocupado && conflito == null && Model.NaListaEspera.Contains(h))
+            {
+                <span class="btn slot-espera disabled"
+                      title="Você está na lista de espera desse horário"
+                      aria-label="@h.ToString("HH:mm"): você está na lista de espera">
+                    @h.ToString("HH:mm")
+                    <small><i class="bi bi-bell-fill"></i> Na espera</small>
+                </span>
+            }
+            else if (ocupado && conflito == null)
+            {
+                <form method="post" asp-action="AvisarSeLiberar">
+                    <input type="hidden" name="servicoId" value="@s.ServicoId" />
+                    <input type="hidden" name="inicio" value="@h.ToString("yyyy-MM-ddTHH:mm", inv)" />
+                    <button type="submit" class="btn slot-ocupado"
+                            title="Horário ocupado. Toque para ser avisado(a) se ele liberar"
+                            aria-label="@h.ToString("HH:mm") ocupado: avise-me se liberar">
+                        @h.ToString("HH:mm")
+                        <small><i class="bi bi-bell"></i> Avise-me</small>
+                    </button>
+                </form>
+            }
+            else if (conflito != null)
             {
                 <span class="btn btn-outline-secondary disabled text-decoration-line-through"
                       title="Você já tem @conflito.Servico?.Nome com @conflito.Profissional?.Usuario?.Nome nesse horário"

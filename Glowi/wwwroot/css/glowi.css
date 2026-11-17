@@ -1190,6 +1190,42 @@ button.avatar {
         width: 100%;
     }
 
+/* Horário ocupado (lista de espera): tracejado e apagado, com "Avise-me" embaixo */
+.slot-ocupado,
+.slot-espera {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.15;
+    gap: .1rem;
+}
+
+    .slot-ocupado small,
+    .slot-espera small {
+        font-size: .68rem;
+        font-weight: 600;
+    }
+
+.slot-ocupado {
+    color: var(--glowi-muted);
+    background: transparent;
+    border: 1px dashed var(--glowi-300);
+}
+
+    .slot-ocupado:hover,
+    .slot-ocupado:focus-visible {
+        color: var(--glowi-700);
+        background: var(--glowi-50);
+        border-color: var(--glowi-500);
+    }
+
+.slot-espera.disabled {
+    color: var(--glowi-pink);
+    background: #fdf2f8;
+    border: 1px solid #fbcfe8;
+    opacity: 1;
+}
+
 /* Chips de filtro (ex.: tipo de profissional): uma linha com rolagem no celular */
 .chips {
     display: flex;

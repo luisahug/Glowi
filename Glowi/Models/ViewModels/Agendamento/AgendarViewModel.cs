@@ -10,6 +10,12 @@ public class AgendarViewModel
     public DateOnly Maximo { get; set; }
     public List<DateTime> Horarios { get; set; } = new();
 
+    // horários de atendimento já reservados por outra pessoa: dá para pedir "Avise-me se liberar"
+    public List<DateTime> Ocupados { get; set; } = new();
+
+    // horários (Brasília) deste serviço em que o(a) cliente já está na lista de espera
+    public HashSet<DateTime> NaListaEspera { get; set; } = new();
+
     // agendamentos em aberto do(a) cliente nesse dia (com qualquer profissional): horários que se sobrepõem a eles não podem ser marcados
     public List<Models.Agendamento> MeusAgendamentosNoDia { get; set; } = new();
 

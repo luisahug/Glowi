@@ -1,0 +1,49 @@
+@model List<Glowi.Models.HorarioDesejado>
+@using System.Globalization
+@using Glowi.Services
+@* Lista de espera (horários desejados) do(a) cliente, em "Meus agendamentos" *@
+
+@if (Model.Any())
+{
+    <h2 class="section-title">Lista de espera</h2>
+    <p class="text-muted small mb-2">Horários ocupados que você pediu para ser avisado(a) se liberarem.</p>
+
+    <div class="list-group mb-4">
+        @foreach (var h in Model)
+        {
+            var inicio = Horario.ParaBrasilia(h.Inicio);
+            var fim = Horario.ParaBrasilia(h.Fim);
+
+            <div class="list-group-item py-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                    <div>
+                        <div class="fw-semibold">@h.Servico?.Nome</div>
+                        <div><i class="bi bi-calendar3 text-muted me-1"></i>@inicio.ToString("dddd, dd/MM 'às' HH:mm") – @fim.ToString("HH:mm")</div>
+                        <div class="text-muted small">com @h.Profissional?.Usuario?.Nome</div>
+                        <div class="mt-2">
+                            @if (h.Liberado)
+                            {
+                                <span class="badge badge-soft-success"><i class="bi bi-bell-fill me-1"></i>Liberou!</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-soft-warning"><i class="bi bi-hourglass-split me-1"></i>Aguardando liberar</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (h.Liberado)
+                        {
+                            <a class="btn btn-sm btn-primary" asp-action="RevisarAgendamento" asp-route-servicoId="@h.ServicoId"
+                               asp-route-inicio="@inicio.ToString("yyyy-MM-ddTHH:mm", CultureInfo.InvariantCulture)">Agendar agora</a>
+                        }
+                        <form method="post" asp-action="SairDaListaEspera" asp-route-id="@h.HorarioDesejadoId">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">Sair da espera</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -17,11 +17,13 @@ public class BloqueiosController : Controller
 
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly AgendaService _agenda;
 
-    public BloqueiosController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+    public BloqueiosController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, AgendaService agenda)
     {
         _context = context;
         _userManager = userManager;
+        _agenda = agenda;
     }
 
     private async Task<int> ProfissionalLogadoIdAsync()
@@ -140,6 +142,9 @@ public class BloqueiosController : Controller
             Motivo = motivo
         });
         await _context.SaveChangesAsync();
+
+        // horários da lista de espera que tinham liberado e agora caíram no bloqueio voltam a "aguardando"
+        await _agenda.VoltarParaEspera(profissionalId, inicio, fim);
 
         TempData["Sucesso"] = agendamentosNoPeriodo.Count == 0
             ? "Período bloqueado. Os(as) clientes não verão horários livres nele."

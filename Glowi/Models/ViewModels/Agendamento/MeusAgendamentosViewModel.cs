@@ -9,4 +9,10 @@ public class MeusAgendamentosViewModel
 
     // só usado na tela do cliente: cancelados por bloqueio da profissional que o cliente ainda não tinha visto
     public List<Models.Agendamento> AvisosCancelamento { get; set; } = new();
+
+    // só usado na tela do cliente: lista de espera (horários desejados) que ainda não passaram
+    public List<HorarioDesejado> HorariosDesejados { get; set; } = new();
+
+    // horários desejados que liberaram e o cliente ainda não tinha visto
+    public List<HorarioDesejado> AvisosLiberados { get; set; } = new();
 }

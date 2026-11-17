@@ -55,6 +55,34 @@
     </div>
 }
 
+@if (Model.AvisosLiberados.Any())
+{
+    var varios = Model.AvisosLiberados.Count > 1;
+
+    <div class="alert alert-success alert-dismissible fade show d-flex gap-2" role="alert">
+        <i class="bi bi-bell-fill"></i>
+        <div>
+            <div class="fw-semibold">
+                @(varios ? "Horários que você queria liberaram!" : "Um horário que você queria liberou!")
+            </div>
+            <div class="small mb-1">Agende logo: outra pessoa também pode reservar.</div>
+            <ul class="mb-0 small">
+                @foreach (var h in Model.AvisosLiberados)
+                {
+                    var inicioDesejado = Horario.ParaBrasilia(h.Inicio);
+                    <li>
+                        @h.Servico?.Nome com @h.Profissional?.Usuario?.Nome ·
+                        @inicioDesejado.ToString("dddd, dd/MM 'às' HH:mm") ·
+                        <a class="alert-link" asp-action="RevisarAgendamento" asp-route-servicoId="@h.ServicoId"
+                           asp-route-inicio="@inicioDesejado.ToString("yyyy-MM-ddTHH:mm", System.Globalization.CultureInfo.InvariantCulture)">Agendar agora</a>
+                    </li>
+                }
+            </ul>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+}
+
 @if (!Model.Proximos.Any())
 {
     <div class="empty-state mb-4">
@@ -62,6 +90,8 @@
         <p>Você não tem agendamentos marcados.</p>
         <a class="btn btn-sm btn-outline-primary mt-3" asp-controller="Profissionais" asp-action="Index">Ver profissionais</a>
     </div>
+
+    <partial name="_ListaEspera" model="Model.HorariosDesejados" />
 }
 
 @foreach (var secao in secoes.Where(s => s.Itens.Any()))
@@ -108,6 +138,12 @@
             </div>
         }
     </div>
+
+    @* lista de espera fica entre os próximos e o histórico *@
+    @if (secao.Titulo == "Próximos")
+    {
+        <partial name="_ListaEspera" model="Model.HorariosDesejados" />
+    }
 }
 
 <partial name="_ModalConfirmacao" model="modalCancelar" />

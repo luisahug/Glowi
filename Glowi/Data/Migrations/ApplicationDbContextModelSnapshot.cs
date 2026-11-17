@@ -249,6 +249,50 @@ namespace Glowi.Data.Migrations
                     b.ToTable("Favoritos");
                 });
 
+            modelBuilder.Entity("Glowi.Models.HorarioDesejado", b =>
+                {
+                    b.Property<int>("HorarioDesejadoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("HorarioDesejadoId"));
+
+                    b.Property<int>("ClienteId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("ClienteViuAviso")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Fim")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Inicio")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LiberadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ProfissionalId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ServicoId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("HorarioDesejadoId");
+
+                    b.HasIndex("ServicoId");
+
+                    b.HasIndex("ProfissionalId", "Inicio");
+
+                    b.HasIndex("ClienteId", "ServicoId", "Inicio")
+                        .IsUnique();
+
+                    b.ToTable("HorariosDesejados");
+                });
+
             modelBuilder.Entity("Glowi.Models.Profissional", b =>
                 {
                     b.Property<int>("ProfissionalId")
@@ -601,6 +645,33 @@ namespace Glowi.Data.Migrations
                     b.Navigation("Cliente");
 
                     b.Navigation("Profissional");
+                });
+
+            modelBuilder.Entity("Glowi.Models.HorarioDesejado", b =>
+                {
+                    b.HasOne("Glowi.Models.Cliente", "Cliente")
+                        .WithMany()
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Glowi.Models.Profissional", "Profissional")
+                        .WithMany()
+                        .HasForeignKey("ProfissionalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Glowi.Models.Servico", "Servico")
+                        .WithMany()
+                        .HasForeignKey("ServicoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cliente");
+
+                    b.Navigation("Profissional");
+
+                    b.Navigation("Servico");
                 });
 
             modelBuilder.Entity("Glowi.Models.Profissional", b =>
